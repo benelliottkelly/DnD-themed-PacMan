@@ -1,0 +1,27 @@
+* {
+  box-sizing: border-box;
+  color: red;
+}
+
+body {
+  margin: 0;
+}
+
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  width: 1000px /* for use to read numbers */
+  /* width: 60vw; */
+  /* max-width: 750px; */
+}
+
+.div {
+  border: 1px solid gray;
+}
+
+.wall {
+  background-image: url('../assets/wall-tile.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
