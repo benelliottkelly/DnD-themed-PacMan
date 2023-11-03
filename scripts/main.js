@@ -4,7 +4,7 @@
 // grid
 const grid = document.querySelector('.grid')
 // constant cells = []
-const cells = []
+let cells
 // score
 let scoreText = document.querySelector('.current-score')
 // high-score
@@ -13,6 +13,7 @@ let highScoreText = document.querySelector('.high-score')
 let livesText = document.querySelector('.hearts')
 // powerups
 let powerupsText = document.querySelector('.powerups')
+
 
 // ! Variables
 // * player
@@ -58,6 +59,7 @@ function createGrid() {
     cell.innerText = `${i}`
     //* console.log(cell.innerText)
     cell.id = `${i}`
+    cell.classList.add('cell')
     // set width and height of cells
     cell.style.width = `${100 / width}%`
     cell.style.aspectRatio = `1`
@@ -65,8 +67,11 @@ function createGrid() {
     // append cells array to grid
     grid.append(cell)
     // push each cell into array 
-    cells.push(cell)
+    // cells.push(cell)
   }
+  cells = document.querySelectorAll('.cell')
+//* here if breaks  cells[657].classList.add('hero')
+
   addWalls()
   // for (let cell of cells) {
   //   if (cell.id <= 27) {
@@ -79,9 +84,8 @@ function createGrid() {
 
 
 
-
 // ! Executions
-// * On map
+
 // ? Walls
 
 // walls = array of unavailable spaces/grids
@@ -149,6 +153,11 @@ function addWalls() {
   }
 }
 
+// * On map
+// * page load
+// call grid function
+  createGrid()
+
 // ? startGame()
   // if game active = false
   // countdown to start using setInterval ... 3... 2... 1... Go!
@@ -173,6 +182,17 @@ function addWalls() {
 // * Player
 // ? addPlayer()
 // add player to start position
+
+
+addPlayer()
+function addPlayer(){
+  const coinflip = Math.floor(Math.random() * 2)
+//  cells = document.querySelectorAll('.cell')
+console.log(cells)
+  coinflip ? cells[658].classList.add('hero') : cells[657].classList.add('hero')
+}
+
+
 
 // ? isWall()
 // function to calculate if new position is a wall or not
@@ -236,10 +256,6 @@ function addWalls() {
 // * start button
 
 // * keyboard input
-
-// * page load
-// call grid function
-createGrid()
 
 // ! stretch goals
 

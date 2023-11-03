@@ -25,3 +25,10 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+.hero {
+  background-image: url('../assets/hero.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
