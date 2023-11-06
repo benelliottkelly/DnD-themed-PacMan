@@ -32,3 +32,31 @@ body {
   background-repeat: no-repeat;
   background-size: cover;
 }
+
+.beholder {
+  background-image: url('../assets/beholder.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.cube {
+  background-image: url('../assets/cube.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.lich {
+  background-image: url('../assets/lich.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.spider {
+  background-image: url('../assets/spider.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}

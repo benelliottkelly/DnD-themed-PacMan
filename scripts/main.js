@@ -9,6 +9,8 @@ let cells
 let scoreText = document.querySelector('.current-score')
 // high-score
 let highScoreText = document.querySelector('.high-score')
+// start button
+let startButton = document.querySelector('#start')
 // lives
 let livesText = document.querySelector('.hearts')
 // powerups
@@ -19,14 +21,30 @@ let powerupsText = document.querySelector('.powerups')
 // * player
 // player start position
 // player current position
+let playerPosition
 // player health
 // player powerups
 
 // * monsters
+class Monsters {
+  constructor (name, startPosition) {
+    this.name = name,
+    this.startPosition = startPosition,
+    this.currentPosition = 0,
+    this.currentDirection = 0,
+    this.state = 'neutral'
+  }
+}
 // monster 1 start/home
+const beholder = new Monsters('beholder', 376)
 // monster 2 start/home
+const cube = new Monsters('cube', 379)
 // monster 3 start/home
+const lich = new Monsters('lich', 432)
 // monster 4 start/home
+const spider = new Monsters('spider', 435)
+
+
 // monster 1 state (chasing or running away)
 // monster 2 state (chasing or running away)
 // monster 3 state (chasing or running away)
@@ -35,6 +53,7 @@ let powerupsText = document.querySelector('.powerups')
 // * environment
 // game active? = false
 // global count for monster movement
+let gameInterval
 // monster speed
 // coins
 // powerups
@@ -159,18 +178,28 @@ function addWalls() {
   createGrid()
 
 // ? startGame()
+function startGame () {
+  clearInterval(gameInterval)
   // if game active = false
   // countdown to start using setInterval ... 3... 2... 1... Go!
 
   // game active = true
   // addPlayer
+  spawnPlayer()
   // addMonsters
+  spawnMonster(beholder)
+  spawnMonster(cube)
+  spawnMonster(lich)
+  spawnMonster(spider)
   // addCoins
   // addPowerUps
   // setInterval for monster movement ever 0.5? seconds
-    // moveMonster(monster1)
-    // moveMonster(monster2)
-    // etc
+  gameInterval = setInterval(() => {
+    // moveMonsters
+    moveMonster(beholder)
+    moveMonster(cube)
+    moveMonster(lich)
+    moveMonster(spider)
   // potential to delay each monster so they leave one after the other
 
   // if player lives === 0
@@ -178,32 +207,152 @@ function addWalls() {
 
   // coinsLeft = grids.filter() => classList.contains('coins'))
     // if (!coinsLeft || !coinsLeft.length) {youWin()}
+  }, 500)
+}
 
 // * Player
 // ? addPlayer()
 // add player to start position
 
 
-addPlayer()
-function addPlayer(){
+
+function spawnPlayer(){
   const coinflip = Math.floor(Math.random() * 2)
 //  cells = document.querySelectorAll('.cell')
-console.log(cells)
+// console.log(cells)
   coinflip ? cells[658].classList.add('hero') : cells[657].classList.add('hero')
+  coinflip ? playerPosition = 658 : playerPosition = 657
 }
 
+// seperate function to move the image representing the player 
+function moveHero() {
+  cells[playerPosition].classList.add('hero')
+} 
 
+function removeHero() {
+  cells[playerPosition].classList.remove('hero')
+}
 
 // ? isWall()
 // function to calculate if new position is a wall or not
 
 // ? movePlayer()
-// only when game active = true
-// move the player based on keyboard inputs
-// prevent leaving map and going through walls
-// if (key === 'ArrowUp' || key === 'W' && currentPostion - width >= 0 && grid[currentPosition - width].classList.contains('wall') === false)
-// repeat for right, left and down
-// loot()
+function movePlayer(evt) {
+  const key = evt.code
+  // prevent screen from scrolling when pressing arrow keys
+  evt.preventDefault()
+  // only when game active = true
+
+  // remove current player position
+  removeHero()
+  // move the player based on keyboard inputs
+  // prevent leaving map and going through walls
+  if ((key === 'ArrowUp' || key === 'KeyW') && playerPosition - width >= 0 && cells[playerPosition - width].classList.contains('wall') === false) {
+    playerPosition -= width
+  } else if ((key === 'ArrowDown' || key === 'KeyS') && playerPosition + width < cells.length && cells[playerPosition + width].classList.contains('wall') === false) {
+	  playerPosition += width
+  } else if ((key === 'ArrowLeft' || key === 'KeyA') && playerPosition % width !== 0 && cells[playerPosition - 1].classList.contains('wall') === false) {
+    playerPosition --
+  } else if ((key === 'ArrowRight' || key === 'KeyD') && playerPosition % width !== -1 && cells[playerPosition + 1].classList.contains('wall') === false) {
+		playerPosition ++
+  // teleport through east and west walls
+  } else if ((key === 'ArrowLeft' || key === 'KeyA') && playerPosition === ((cellCount - width) / 2) - width) {
+    playerPosition = (((cellCount - width) / 2)) + (width -1) - width
+  } else if ((key === 'ArrowRight' || key === 'KeyD') && playerPosition === ((((cellCount - width) / 2)) + (width -1) - width)) {
+    playerPosition = ((cellCount - width) / 2) - width
+  }
+  // add new player position
+  moveHero()
+  // loot()
+
+}
+
+// * Monsters
+// spawnMonsters
+function spawnMonster(monster) {
+  cells[monster.startPosition].classList.add(`${monster.name}`)
+  monster.currentPosition = monster.startPosition
+}
+
+
+
+
+// * Monsters
+
+// ? moveMonster(monsterNumber)
+function moveMonster(monster) {
+// variables for checking if position NSEW of monster are walls
+let wallNorth = cells[monster.currentPosition - width].classList.contains('wall')
+let wallSouth = cells[monster.currentPosition + width].classList.contains('wall')
+let wallEast = cells[monster.currentPosition + 1].classList.contains('wall')
+let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
+  // function for changing monster direction
+  function changeDirection() {
+    const direction = [- width, + width, -1, +1]
+    let randomNumber = Math.floor(Math.random() * 4)
+    while (cells[monster.currentPosition + direction[randomNumber]].classList.contains('wall') === true) {
+      randomNumber = Math.floor(Math.random() * 4)
+    }
+      monster.currentPosition = monster.currentPosition + direction[randomNumber]
+      monster.currentDirection = parseInt(direction[randomNumber])
+  }
+  //  console.log(monster.currentPosition)
+    cells[monster.currentPosition].classList.remove(`${monster.name}`)
+    // if monster is in starting cells move out
+    if (monster.currentPosition === 375 || monster.currentPosition === 376 || monster.currentPosition === 403 || monster.currentPosition === 404 || monster.currentPosition === 431 || monster.currentPosition === 432) {
+      monster.currentPosition ++
+    } else if (monster.currentPosition === 379 || monster.currentPosition === 380 || monster.currentPosition === 407 || monster.currentPosition === 408 || monster.currentPosition === 435 || monster.currentPosition === 436) {
+      monster.currentPosition --
+    } else if (monster.currentPosition === 349 || monster.currentPosition === 350 || monster.currentPosition === 377 || monster.currentPosition === 378 || monster.currentPosition === 405 || monster.currentPosition === 406 || monster.currentPosition === 433 || monster.currentPosition === 434){
+      monster.currentPosition -= width
+      monster.currentDirection = 0 - width
+      // if monster reaches a junction chose random direction
+    } else if ((wallNorth === false && wallEast === false) || (wallNorth === false && wallWest === false) || (wallSouth === false && wallEast === false) || (wallSouth === false && wallWest === false)) {
+        changeDirection()
+        // if monster is moving in a direction and can continue in that direction, keep going until it hits a wall
+      } else if (monster.currentDirection != 0) {
+        if (monster.currentPosition === ((cellCount - width) / 2) - width && monster.currentDirection === + 1) {
+        monster.currentPosition = (((cellCount - width) / 2)) + (width -1) - width
+      } else if (monster.currentPosition === ((((cellCount - width) / 2)) + (width -1) - width) && monster.currentDirection === -1) {
+        monster.currentPosition = ((cellCount - width) / 2) - width
+      } else if (wallNorth === false && monster.currentDirection === (0 - width)) {
+        monster.currentPosition -= width
+        monster.currentDirection = 0 - width
+      } else if (wallSouth === false && monster.currentDirection === (0 + width)) {
+        monster.currentPosition += width
+        monster.currentDirection = 0 + width
+      } else if (wallWest === false && monster.currentDirection === (-1)) {
+        monster.currentPosition --
+        monster.currentDirection = 0 - 1
+      } else if (wallEast === false && monster.currentDirection === (+1)) {
+        monster.currentPosition ++
+        monster.currentDirection = 0 + 1
+      } else {
+        changeDirection()
+      }
+    }
+    cells[monster.currentPosition].classList.add(`${monster.name}`)
+}
+
+
+// monster will move every x seconds
+// movement will be randomised first then potentially updated to be based on the shortest route to the player (Dijkstra’s algorithm or A*)
+// monster must first leave homespaces
+
+// randomMovement
+// instead of random every turn, move until they collide and then chose a random direction
+// Array with [1, -1, width, 0-width]
+// i = Math.floor(Math.random() * 4)
+// monster position remove classlist
+// use same logic as movePlayer() to check monster is not moving out of map or into a wall
+// monster position += array[i]
+// monster position add classlist
+
+// if monster position has classlist 'hero'
+// if powerup active
+// monster goes inactive and moves home || position is reset to home
+// else
+// loseLife
 
 // ? loseLife()
 // when a monster comes into contact with player player loses life
@@ -220,42 +369,22 @@ console.log(cells)
 // player either becomes invincible or gains a bonus to their roll
 // this will either be on a timer if invincible or last the game if a bonus
 
-// * Monsters
-// ? moveMonster(monsterNumber)
-// monster will move every x seconds
-// movement will be randomised first then potentially updated to be based on the shortest route to the player (Dijkstra’s algorithm or A*)
-// monster must first leave homespaces
+// * Game state
+// ? gameOver()
+// clearInterval global monster movement
+// game active = false
+// display score nicely on screen
 
-  // randomMovement
-  // instead of random every turn, move until they collide and then chose a random direction
-    // Array with [1, -1, width, 0-width]
-    // i = Math.floor(Math.random() * 4)
-    // monster position remove classlist
-    // use same logic as movePlayer() to check monster is not moving out of map or into a wall
-    // monster position += array[i]
-    // monster position add classlist
-
-  // if monster position has classlist 'hero'
-    // if powerup active
-    // monster goes inactive and moves home || position is reset to home
-    // else
-    // loseLife
-
-  // * Game state
-  // ? gameOver()
-  // clearInterval global monster movement
-  // game active = false
-  // display score nicely on screen
-
-  // ? youWin()
-  // clearInterval
-  // congratulations message
-  // play again/next level
+// ? youWin()
+// clearInterval
+// congratulations message
+// play again/next level
 
 // ! Events
 // * start button
-
+startButton.addEventListener('click', startGame)
 // * keyboard input
+const keyboardInput = document.addEventListener('keydown', movePlayer)
 
 // ! stretch goals
 
