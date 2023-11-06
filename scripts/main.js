@@ -16,7 +16,6 @@ let livesText = document.querySelector('.hearts')
 // powerups
 let powerupsText = document.querySelector('.powerups')
 
-
 // ! Variables
 // * player
 // player current position
@@ -62,6 +61,8 @@ let monsterSpeed = 500
 // powerups
 // coinsLeft = [] // cells with coins left array
 let coinsLeft = []
+// game paused while functions execute properly
+let gamePaused = false
 
 // ! Grid
 // board width
@@ -89,22 +90,10 @@ function createGrid() {
     cell.style.border = '1px solid rgba(0, 0, 0, 0.5)'
     // append cells array to grid
     grid.append(cell)
-    // push each cell into array 
-    // cells.push(cell)
   }
-  cells = document.querySelectorAll('.cell')
-//* here if breaks  cells[657].classList.add('hero')
-
+  cells = document.getElementsByClassName('cell')
   addWalls()
-  // for (let cell of cells) {
-  //   if (cell.id <= 27) {
-  //     cell.classList.add('wall')
-  //   }
-  //   console.log(`cell ${cell.id} classList is ${cell.classList}`)
-  // }
-
 }
-
 
 
 // ! Executions
@@ -169,8 +158,7 @@ function addWalls() {
       }
     }
     
-  }
-  
+  }  
   for (let wall of walls) {
     wall.classList.add('wall')
   }
@@ -229,6 +217,8 @@ function addCoins() {
   createGrid()
 // add coins
   addCoins()
+
+// ! Main game functions
 // ? startGame()
 function startGame () {
   if (gameActive === false) {
@@ -248,6 +238,7 @@ function startGame () {
     // addPowerUps
     // setInterval for monster movement ever 0.5? seconds
     gameInterval = setInterval(() => {
+      if (gamePaused === false) {
       // moveMonsters
       moveMonster(beholder)
       moveMonster(cube)
@@ -261,9 +252,16 @@ function startGame () {
       clearInterval(gameInterval)
     }
     // gameOver()
-
+    coinsUntilWin()
+    if (coinsLeft === 0) {
+      console.log(`You win`)
+      clearInterval(gameInterval)
+    }
     // coinsLeft = grids.filter() => classList.contains('coins'))
       // if (!coinsLeft || !coinsLeft.length) {youWin()}
+      } else if (gamePaused === true) {
+        return
+      }
     }, monsterSpeed)
   }
 }
@@ -273,8 +271,6 @@ function startGame () {
 // add player to start position
 function spawnPlayer(){
   const coinflip = Math.floor(Math.random() * 2)
-//  cells = document.querySelectorAll('.cell')
-// console.log(cells)
   coinflip ? cells[658].classList.add('hero') : cells[657].classList.add('hero')
   coinflip ? playerPosition = 658 : playerPosition = 657
 }
@@ -284,6 +280,7 @@ function moveHero() {
   cells[playerPosition].classList.add('hero')
 } 
 
+// function to remove hero icon when moving or dying
 function removeHero() {
   cells[playerPosition].classList.remove('hero')
 }
@@ -422,6 +419,7 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 
 // ? loseLife()
 function loseLife() {
+  gamePaused = true
   playerHealth --
   console.log(playerHealth)
   removeHero()
@@ -456,6 +454,11 @@ function loot(){
 // ? powerUp()
 // player either becomes invincible or gains a bonus to their roll
 // this will either be on a timer if invincible or last the game if a bonus
+
+// creates an arrya with of all the tiles with coins left, until there are none left and a win condition can be triggered
+function coinsUntilWin() {
+    coinsLeft = document.getElementsByClassName('coins').length
+}
 
 // * Game state
 // ? gameOver()

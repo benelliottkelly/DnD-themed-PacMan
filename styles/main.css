@@ -1,3 +1,7 @@
+:root {
+  --width: 1000px;
+}
+
 * {
   box-sizing: border-box;
   color: red;
@@ -5,12 +9,27 @@
 
 body {
   margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .main {
-  width: 1000px; /* for use to read numbers */
+  width: var(--width); /* for use to read numbers */
   /* width: 60vw; */
   /* max-width: 750px; */
+}
+
+.scores-container {
+  display: flex;
+  justify-content: space-between;
+  width: var(--width); 
+}
+
+.player-state {
+  display: flex;
+  justify-content: space-around;
+  width: var(--width); 
 }
 
 .grid {
