@@ -19,10 +19,12 @@ let powerupsText = document.querySelector('.powerups')
 
 // ! Variables
 // * player
-// player start position
 // player current position
 let playerPosition
 // player health
+let playerHealth = 3
+// score
+let playerScore = 0
 // player powerups
 
 // * monsters
@@ -52,12 +54,14 @@ const spider = new Monsters('spider', 435)
 
 // * environment
 // game active? = false
+let gameActive = false
 // global count for monster movement
 let gameInterval
 // monster speed
-// coins
+let monsterSpeed = 500
 // powerups
 // coinsLeft = [] // cells with coins left array
+let coinsLeft = []
 
 // ! Grid
 // board width
@@ -172,50 +176,101 @@ function addWalls() {
   }
 }
 
+// coins
+
+const coins = []
+const coinLine2 = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
+const coinLine3 = [57, 62, 68, 71, 77, 82]
+const coinLine4 = coinLine3.map( n => n + width)
+const coinLine5 = coinLine4.map( n => n + width)
+const coinLine6 = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166]
+const coinLine7 = [169, 174, 177, 186, 189, 194]
+const coinLine8 = coinLine7.map( n => n + width)
+const coinLine9 = [225, 226, 227, 228, 229, 230, 233, 234, 235, 236, 239, 240, 241, 242, 245, 246, 247, 248, 249, 250]
+const coinLine10 = [258, 273]
+const coinLine11 = coinLine10.map( n => n + width)
+const coinLine12 = coinLine11.map( n => n + width)
+const coinLine13 = coinLine12.map( n => n + width)
+const coinLine14 = coinLine13.map( n => n + width)
+const coinLine15 = coinLine14.map( n => n + width)
+const coinLine16 = coinLine15.map( n => n + width)
+const coinLine17 = coinLine16.map( n => n + width)
+const coinLine18 = coinLine17.map( n => n + width)
+const coinLine19 = coinLine18.map( n => n + width)
+const coinLine20 = coinLine19.map( n => n + width)
+const coinLine21 = coinLine2.map( n => n + width * 19)
+const coinLine22 = coinLine3.map( n => n + width * 19)
+const coinLine23 = coinLine3.map( n => n + width * 20)
+const coinLine24 = [645, 646, 647, 650, 651, 652, 653, 654, 655, 656, 659, 660, 661, 662, 663, 664, 665, 668, 669, 670]
+const coinLine25 = [675, 678, 681, 690, 693, 696]
+const coinLine26 = coinLine25.map( n => n + width)
+const coinLine27 = coinLine9.map( n => n + width * 18)
+const coinLine28 = [757, 768, 771, 782]
+const coinLine29 = coinLine28.map( n => n + width)
+const coinLine30 = coinLine6.map( n => n + width * 24)
+
+const coinMap = coinLine2.concat(coinLine3, coinLine4, coinLine5, coinLine6, coinLine7, coinLine8, coinLine9, coinLine10, coinLine11, coinLine12, coinLine13, coinLine14, coinLine15, coinLine16, coinLine17, coinLine18, coinLine19, coinLine20, coinLine21, coinLine22, coinLine23, coinLine24, coinLine25, coinLine26, coinLine27, coinLine28, coinLine29, coinLine30)
+
+function addCoins() {
+  for (let cell of cells) {
+    for (c of coinMap) {
+      if (parseFloat(cell.id) === c) {
+        coins.push(cell)
+      }
+    }
+  }
+  for (let coin of coins) {
+    coin.classList.add('coins')
+  }
+}
 // * On map
 // * page load
 // call grid function
   createGrid()
-
+// add coins
+  addCoins()
 // ? startGame()
 function startGame () {
-  clearInterval(gameInterval)
-  // if game active = false
-  // countdown to start using setInterval ... 3... 2... 1... Go!
+  if (gameActive === false) {
+    clearInterval(gameInterval)
+    gameActive === true
+    // countdown to start using setInterval ... 3... 2... 1... Go!
 
-  // game active = true
-  // addPlayer
-  spawnPlayer()
-  // addMonsters
-  spawnMonster(beholder)
-  spawnMonster(cube)
-  spawnMonster(lich)
-  spawnMonster(spider)
-  // addCoins
-  // addPowerUps
-  // setInterval for monster movement ever 0.5? seconds
-  gameInterval = setInterval(() => {
-    // moveMonsters
-    moveMonster(beholder)
-    moveMonster(cube)
-    moveMonster(lich)
-    moveMonster(spider)
-  // potential to delay each monster so they leave one after the other
+    // game active = true
+    // addPlayer
+    spawnPlayer()
+    // addMonsters
+    spawnMonster(beholder)
+    spawnMonster(cube)
+    spawnMonster(lich)
+    spawnMonster(spider)
+    // addCoins
+    // addPowerUps
+    // setInterval for monster movement ever 0.5? seconds
+    gameInterval = setInterval(() => {
+      // moveMonsters
+      moveMonster(beholder)
+      moveMonster(cube)
+      moveMonster(lich)
+      moveMonster(spider)
+    // potential to delay each monster so they leave one after the other
 
-  // if player lives === 0
-  // gameOver()
+    // if player lives === 0
+    if (playerHealth === 0) {
+      console.log(`Game over!`)
+      clearInterval(gameInterval)
+    }
+    // gameOver()
 
-  // coinsLeft = grids.filter() => classList.contains('coins'))
-    // if (!coinsLeft || !coinsLeft.length) {youWin()}
-  }, 500)
+    // coinsLeft = grids.filter() => classList.contains('coins'))
+      // if (!coinsLeft || !coinsLeft.length) {youWin()}
+    }, monsterSpeed)
+  }
 }
 
 // * Player
-// ? addPlayer()
+
 // add player to start position
-
-
-
 function spawnPlayer(){
   const coinflip = Math.floor(Math.random() * 2)
 //  cells = document.querySelectorAll('.cell')
@@ -263,7 +318,11 @@ function movePlayer(evt) {
   }
   // add new player position
   moveHero()
+  if (cells[playerPosition].classList.contains('beholder', 'cube', 'lich', 'spider')) {
+    loseLife()
+  }
   // loot()
+  loot()
 
 }
 
@@ -274,10 +333,15 @@ function spawnMonster(monster) {
   monster.currentPosition = monster.startPosition
 }
 
-
-
-
-// * Monsters
+function removeMonster() {
+  for (let cell of cells) {
+  // console.log(cell.classList)
+  cell.classList.remove('beholder')
+  cell.classList.remove('cube')
+  cell.classList.remove('lich')
+  cell.classList.remove('spider')
+  }
+}
 
 // ? moveMonster(monsterNumber)
 function moveMonster(monster) {
@@ -332,8 +396,10 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
       }
     }
     cells[monster.currentPosition].classList.add(`${monster.name}`)
+    if (cells[monster.currentPosition].classList.contains('hero')) {
+      loseLife()
+    }
 }
-
 
 // monster will move every x seconds
 // movement will be randomised first then potentially updated to be based on the shortest route to the player (Dijkstra’s algorithm or A*)
@@ -355,11 +421,33 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 // loseLife
 
 // ? loseLife()
+function loseLife() {
+  playerHealth --
+  console.log(playerHealth)
+  removeHero()
+  removeMonster()
+  setTimeout(() => {
+    spawnPlayer()
+    spawnMonster(beholder)
+    spawnMonster(cube)
+    spawnMonster(lich)
+    spawnMonster(spider)
+  }, 1000)
+}
+
+
 // when a monster comes into contact with player player loses life
 // reset player position
 // reset monsters positions
 
 // ? loot()
+function loot(){
+  if (cells[playerPosition].classList.contains('coins')) {
+    playerScore += 100
+    scoreText.innerText = `Current Score: ${parseInt(playerScore)}`
+    cells[playerPosition].classList.remove('coins')
+  } 
+}
 // if player walks over cell with a coin on it they add to score
 // if playerPosition has class of coin add to score
 // remove classList 'coin'

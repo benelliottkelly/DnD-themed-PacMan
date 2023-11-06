@@ -7,20 +7,38 @@ body {
   margin: 0;
 }
 
+.main {
+  width: 1000px; /* for use to read numbers */
+  /* width: 60vw; */
+  /* max-width: 750px; */
+}
+
 .grid {
   display: flex;
   flex-wrap: wrap;
-  width: 1000px /* for use to read numbers */
-  /* width: 60vw; */
-  /* max-width: 750px; */
+  width: 100%;
 }
 
 .div {
   border: 1px solid gray;
 }
 
+.floor {
+  background-image: url('../assets/floor.jpg');
+  background-position: center;
+  background-repeat: repeat;
+  background-size: 3.5%;
+}
+
 .wall {
   background-image: url('../assets/wall-tile.jpg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.coins {
+  background-image: url('../assets/coin.gif');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
