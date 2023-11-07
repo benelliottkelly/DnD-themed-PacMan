@@ -18,7 +18,14 @@ let hoverCoin = document.querySelector('.payment')
 // lives
 let hearts = document.getElementsByClassName('life')
 // powerups
-let powerupsText = document.querySelector('.powerups')
+let powerUpsText = document.querySelector('.powerups')
+// gameoverContainer
+let gameOverContainer = document.querySelector('.game-over')
+// gameover
+let gameOverText = document.querySelector('h2')
+// play again/ continue button
+let gameOverBtn = document.querySelector('.game-over-button')
+
 
 // ! Variables
 // * player
@@ -28,7 +35,12 @@ let playerPosition
 let playerHealth = 3
 // score
 let playerScore = 0
-// player powerups
+// player continuing or restarting
+let playerContinue = false
+// high score
+let playerHighScore = localStorage.getItem("high-score")
+playerHighScore ? highScoreText.innerText = `High Score: ${parseInt(playerHighScore)}` : highScoreText.innerText = `High Score: 0`
+
 
 // * monsters
 class Monsters {
@@ -69,11 +81,13 @@ let gameInterval
 // monster speed
 let monsterSpeed = 500
 // powerups
-let powerUp = false
+let powerUpActive = false
+let powerUpTimer
 // coinsLeft = [] // cells with coins left array
 let coinsLeft = []
 // game paused while functions execute properly
 let gamePaused = false
+
 
 // ! Grid
 // board width
@@ -222,24 +236,49 @@ function addCoins() {
   }
 }
 // * add power-ups to grid
-
+let powerUpsGrid = [85, 110, 645, 670]
+function addPowerUps() {
+  for (let cell of cells) {
+    for (p of powerUpsGrid) {
+      if (parseFloat(cell.id) === p) {
+        cell.classList.add('powerUp')
+      }
+    }
+  }
+}
 
 // * On map
 // * page load
 // call grid function
   createGrid()
-// add coins
-  addCoins()
 
 // ! Main game functions
 // ? startGame()
 function startGame () {
+  gameOverContainer.style.display = 'none'
+  hideCoin()
   if (gameActive === false) {
     clearInterval(gameInterval)
+    if (playerContinue === false) {
+      playerScore = 0
+      scoreText.innerText = `Current Score: ${parseInt(playerScore)}`
+      monsterSpeed = 500
+    } else if (playerContinue === true && monsterSpeed > 100){
+      monsterSpeed -= 100
+      console.log(monsterSpeed)
+    }
+    playerHealth = 3
+    hearts[2].style.display = 'flex'
+    hearts[1].style.display = 'flex'
+    hearts[0].classList.remove('heart-broken')
+    // add coins
+    addCoins()
+    // add power ups
+    addPowerUps()
+    powerUpActive = false
     gameActive = true
     // countdown to start using setInterval ... 3... 2... 1... Go!
 
-    // game active = true
     // addPlayer
     spawnPlayer()
     // addMonsters
@@ -247,8 +286,6 @@ function startGame () {
     spawnMonster(cube)
     spawnMonster(lich)
     spawnMonster(spider)
-    // addCoins
-    // addPowerUps
     // setInterval for monster movement ever 0.5? seconds
     gameInterval = setInterval(() => {
       if (gamePaused === false) {
@@ -269,21 +306,26 @@ function startGame () {
         }
         // if player lives === 0
         if (playerHealth === 0) {
-          console.log(`Game over!`)
+          setHighScore()
+          playerContinue = false
+          gameOverText.innerText = `GAME OVER!${'\n'}You were unable to escape the dungeon...${'\n'}Your final score was: ${playerScore}`
+          gameOverBtn.innerText = `Play Again`
+          gameOverContainer.style.display = 'block'
           clearInterval(gameInterval)
           gameActive = false
         }
         // gameOver()
         coinsUntilWin()
         if (coinsLeft === 0) {
-          console.log(`You win`)
+          setHighScore()
+          playerContinue = true
+          gameActive = false
+          gameOverText.innerText = `CONGRATULATIONS!${'\n'}You managed to gather all of the treasure...${'\n'}Your current score is: ${playerScore}${'\n'}Would you like to delve deeper?...`
+          gameOverBtn.innerText = `Continue...`
+          gameOverContainer.style.display = 'block'
           clearInterval(gameInterval)
         }
-        // coinsLeft = grids.filter() => classList.contains('coins'))
-          // if (!coinsLeft || !coinsLeft.length) {youWin()}
-      } //else if (gamePaused === true) {
-       // return
-      //}
+      }
     }, monsterSpeed)
   }
 }
@@ -322,7 +364,7 @@ function movePlayer(evt) {
   // prevent screen from scrolling when pressing arrow keys
   evt.preventDefault()
   // only when game active = true
-  if (gameActive === true) {
+  if (gameActive === true && gamePaused === false) {
   // remove current player position
   removeHero()
   // move the player based on keyboard inputs
@@ -340,6 +382,10 @@ function movePlayer(evt) {
     playerPosition = (((cellCount - width) / 2)) + (width -1) - width
   } else if ((key === 'ArrowRight' || key === 'KeyD') && playerPosition === ((((cellCount - width) / 2)) + (width -1) - width)) {
     playerPosition = ((cellCount - width) / 2) - width
+  }
+  if (cells[playerPosition].classList.contains('powerUp')) {
+    cells[playerPosition].classList.remove('powerUp')
+    powerUp()
   }
   // add new player position
   if (cells[playerPosition].classList.contains('beholder') || cells[playerPosition].classList.contains('cube') || cells[playerPosition].classList.contains('lich') || cells[playerPosition].classList.contains('spider')) {
@@ -366,10 +412,8 @@ function removeMonster() {
   //cells.forEach(cell => cell.classList.remove('beholder', 'cube', 'lich', 'spider'))
   for (let cell of cells) {
   // console.log(cell.classList)
-  cell.classList.remove(...enemyClasses)
-  console.log(cell.classList)
+    cell.classList.remove(...enemyClasses)
   }
-  console.log('remove monster')
 }
 
 // ? moveMonster(monsterNumber)
@@ -451,6 +495,21 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 
 // ? loseLife()
 function loseLife() {
+  if (powerUpActive === true) {
+    if (cells[playerPosition].classList.contains('beholder')){
+      spawnMonster(beholder)
+      playerScore += 200
+    } else if (cells[playerPosition].classList.contains('cube')) {
+      spawnMonster(cube)
+      playerScore += 200
+    } else if (cells[playerPosition].classList.contains('lich')) {
+      spawnMonster(lich)
+      playerScore += 200
+    } else if (cells[playerPosition].classList.contains('spider')) {
+      spawnMonster(spider)
+      playerScore += 200
+    }
+  } else {
   gamePaused = true
   playerHealth --
   removeHero()
@@ -464,6 +523,7 @@ function loseLife() {
     spawnMonster(lich)
     spawnMonster(spider)
   }, 1000)
+  }
 }
 
 
@@ -487,16 +547,42 @@ function loot(){
 // ? powerUp()
 // player either becomes invincible or gains a bonus to their roll
 // this will either be on a timer if invincible or last the game if a bonus
+let flashingEnemies
+
+function powerUp() {
+  powerUpTimer = clearTimeout
+  powerUpActive = true
+  powerUpsText.classList.add('powerUpIcon')
+  // flashingEnemies = setInterval(() => {
+  //   for (let cell of cells) {
+  //     console.log('contains enemies' + cell.classList.contains(...enemies))
+  //     if (cell.classList.contains(...enemies)) {
+        
+  //       cell.classList.add('vulnerable')
+  //     } else {
+  //       cell.classList.remove('vulnerable')
+  //     }
+  //   }
+  // }, 200)
+  powerUpTimer = setTimeout(() => {
+    powerUpsText.classList.remove('powerUpIcon')
+    powerUpActive = false
+  }
+  , 5000)
+}
+
 
 // creates an arrya with of all the tiles with coins left, until there are none left and a win condition can be triggered
 function coinsUntilWin() {
-    coinsLeft = document.getElementsByClassName('coins').length
+  coinsLeft = document.getElementsByClassName('coins').length
 }
 
 // * Game state
 // ? startCoin
 function showCoin() {
-  hoverCoin.style.display = 'block'
+  if (gameActive === false) {
+    hoverCoin.style.display = 'block'
+  }
 }
 function hideCoin() {
   hoverCoin.style.display = 'none'
@@ -512,6 +598,19 @@ function hideCoin() {
 // congratulations message
 // play again/next level
 
+// ? high score()
+function setHighScore() {
+  if(playerHighScore !== null){
+    if (playerScore > parseInt(playerHighScore)) {
+        localStorage.setItem("high-score", playerScore)    
+      }
+    } else {
+      localStorage.setItem("high-score", playerScore)
+  }
+  playerHighScore = localStorage.getItem("high-score")
+  highScoreText.innerText = `High Score: ${parseInt(playerHighScore)}`
+}
+
 // ! Events
 // * start button
 insertCoins.addEventListener('click', startGame)
@@ -520,6 +619,9 @@ insertCoins.addEventListener('mouseover', showCoin)
 insertCoins.addEventListener('mouseleave', hideCoin)
 // * keyboard input
 const keyboardInput = document.addEventListener('keydown', movePlayer)
+// * game over / play again button
+gameOverBtn.addEventListener('click', startGame)
+
 
 // ! stretch goals
 

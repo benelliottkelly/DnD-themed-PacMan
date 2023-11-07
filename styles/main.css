@@ -27,6 +27,31 @@ body {
   /* width: 60vw; */
   /* max-width: 750px; */
   min-width: var(--min-width);
+  position: relative;
+}
+
+.game-over {
+  display: none;
+  padding: 1em;
+  position: absolute;
+  bottom: 30%;
+  margin: 0 auto;
+  background-image: linear-gradient(rgba(255, 0, 0, 0.9), rgba(255, 255, 0, 0.9));
+  width: 70%;
+  text-align: center;
+  left: 0;
+  right: 0;
+  /* color: black; */
+  border: 2px solid black;
+  box-shadow: 5px 5px 10px 4px lightblue;
+  /* font-family: 'Pixelify Sans', sans-serif; */
+  /* font-size: 1em; */
+}
+
+h2 {
+  font-family: 'Pixelify Sans', sans-serif;
+  color: black;
+  font-size: 2em;
 }
 
 .scores-container {
@@ -42,12 +67,14 @@ body {
 .insert-coins {
   display: flex;
   align-items: center;
+  position: relative;
+  cursor: pointer;
 }
 
 .payment {
   display: none;
-  position: relative;
-  right: 10px;
+  position: absolute;
+  right: -15px;
   background-image: url(../assets/payment.png);
   background-position: center;
   background-repeat: no-repeat;
@@ -70,7 +97,7 @@ button {
 
 .player-state {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   width: var(--width); 
   min-width: var(--min-width);
   padding: 0.5em;
@@ -83,8 +110,8 @@ button {
 }
 
 .cell {
-  /* color: transparent;
-  user-select: none; */
+  color: transparent;
+  user-select: none;
 }
 
 .div {
@@ -112,6 +139,13 @@ button {
   background-size: cover;
 }
 
+.powerUp {
+  background-image: url('../assets/sword.gif');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
 .hearts {
   display: flex;
 }
@@ -128,11 +162,15 @@ button {
 
 .heart-broken {
   background-image: url('../assets/heart-broken.png');
+}
+
+.powerUpIcon {
+  background-image: url('../assets/two-swords.gif');
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  width: 20px;
-  aspect-ratio: 1;
+  width: 600px;
+  height: 20px;
   margin: 0 0.2em;
 }
 
@@ -171,6 +209,13 @@ button {
   background-size: cover;
 }
 
+.vulnerable {
+  /* animation-duration: 0.5s;
+  animation-name: monsterFlash;
+  animation-iteration-count: infinite; */
+  /* background-image: linear-gradient(rgba(72, 0, 255, 0.333), rgba(72, 0, 255, 0.333)); */
+}
+
 @keyframes coinHover {
   from {
     margin-left: 5px;
@@ -179,3 +224,12 @@ button {
     margin-right: 5px;
   }
 }
+
+/* @keyframes monsterFlash {
+  from {
+    background: linear-gradient(rgba(72, 0, 255, 0.333), rgba(72, 0, 255, 0.333));
+  }
+  to {
+    background: linear-gradient(rgba(255, 255, 255, 0.333), rgba(255, 255, 255, 0.333);
+  }
+} */
