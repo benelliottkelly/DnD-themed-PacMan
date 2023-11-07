@@ -1,5 +1,6 @@
 :root {
-  --width: 1000px;
+  --width: 40vw;
+  --min-width: 600px;
 }
 
 * {
@@ -8,34 +9,82 @@
 }
 
 body {
+  background-image: url(../assets/arcade.png);
+  background-position: center 40%;
+  background-repeat: no-repeat;
+  background-size: 275%;
   margin: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  height: 100vh;
+  min-width: 1300px;
 }
 
 .main {
   width: var(--width); /* for use to read numbers */
   /* width: 60vw; */
   /* max-width: 750px; */
+  min-width: var(--min-width);
 }
 
 .scores-container {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   width: var(--width); 
+  min-width: var(--min-width);
+  font-family: 'Pixelify Sans', sans-serif;
+  padding: 1em;
+}
+
+.insert-coins {
+  display: flex;
+  align-items: center;
+}
+
+.payment {
+  display: none;
+  position: relative;
+  right: 10px;
+  background-image: url(../assets/payment.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 50px;
+  width: 25px;
+  animation-duration: 1s;
+  animation-name: coinHover;
+  animation-iteration-count: infinite;
+}
+
+button {
+  background-color: rgba(0, 0, 0, 0.5);
+  border: solid 5px grey;
+  font-size: 2em;
+  color: black;
+  padding: 0 1px;
+  font-weight: bold;
 }
 
 .player-state {
   display: flex;
   justify-content: space-around;
   width: var(--width); 
+  min-width: var(--min-width);
+  padding: 0.5em;
 }
 
 .grid {
   display: flex;
   flex-wrap: wrap;
   width: 100%;
+}
+
+.cell {
+  /* color: transparent;
+  user-select: none; */
 }
 
 .div {
@@ -61,6 +110,30 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.hearts {
+  display: flex;
+}
+
+.life {
+  background-image: url('../assets/heart-pixel.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 20px;
+  aspect-ratio: 1;
+  margin: 0 0.2em;
+}
+
+.heart-broken {
+  background-image: url('../assets/heart-broken.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  width: 20px;
+  aspect-ratio: 1;
+  margin: 0 0.2em;
 }
 
 .hero {
@@ -96,4 +169,13 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+@keyframes coinHover {
+  from {
+    margin-left: 5px;
+  }
+  to {
+    margin-right: 5px;
+  }
 }

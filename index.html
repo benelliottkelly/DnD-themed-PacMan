@@ -5,19 +5,26 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script defer src="scripts/main.js" charset="utf-8"></script>
   <link rel="stylesheet" href="styles/main.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
   <title>DnD PacMan</title>
 </head>
 <body>
   <section class="scores-container">
     <div class="current-score">Current Score: 0</div>
     <div class="high-score">High Score: 0</div>
-    <button id="start">Insert Coins</button>
+    <div class="insert-coins">Insert a coin to start -> <button id="start">|</button><div class="payment"></div></div>
   </section>
   <section class="main floor">
     <section class="grid"></section>
   </section>
   <section class="player-state">
-    <div class="hearts">❤❤❤</div>
+    <div class="hearts">
+      <div class="life"></div>
+      <div class="life"></div>
+      <div class="life"></div>
+    </div>
     <div class="powerups">⚔</div>
   </section>
 </body>

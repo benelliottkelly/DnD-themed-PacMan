@@ -11,8 +11,12 @@ let scoreText = document.querySelector('.current-score')
 let highScoreText = document.querySelector('.high-score')
 // start button
 let startButton = document.querySelector('#start')
+//
+let insertCoins = document.querySelector('.insert-coins')
+//
+let hoverCoin = document.querySelector('.payment')
 // lives
-let livesText = document.querySelector('.hearts')
+let hearts = document.getElementsByClassName('life')
 // powerups
 let powerupsText = document.querySelector('.powerups')
 
@@ -34,8 +38,12 @@ class Monsters {
     this.currentPosition = 0,
     this.currentDirection = 0,
     this.state = 'neutral'
+    enemies.push(this)
   }
 }
+
+const enemies = []
+
 // monster 1 start/home
 const beholder = new Monsters('beholder', 376)
 // monster 2 start/home
@@ -45,11 +53,13 @@ const lich = new Monsters('lich', 432)
 // monster 4 start/home
 const spider = new Monsters('spider', 435)
 
-
+const enemyClasses = ['beholder', 'cube', 'lich', 'spider']
 // monster 1 state (chasing or running away)
 // monster 2 state (chasing or running away)
 // monster 3 state (chasing or running away)
 // monster 4 state (chasing or running away)
+
+
 
 // * environment
 // game active? = false
@@ -59,6 +69,7 @@ let gameInterval
 // monster speed
 let monsterSpeed = 500
 // powerups
+let powerUp = false
 // coinsLeft = [] // cells with coins left array
 let coinsLeft = []
 // game paused while functions execute properly
@@ -164,12 +175,11 @@ function addWalls() {
   }
 }
 
-// coins
-
+// * add coins to grid
 const coins = []
 const coinLine2 = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 const coinLine3 = [57, 62, 68, 71, 77, 82]
-const coinLine4 = coinLine3.map( n => n + width)
+const coinLine4 = [90, 96, 99, 105]
 const coinLine5 = coinLine4.map( n => n + width)
 const coinLine6 = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166]
 const coinLine7 = [169, 174, 177, 186, 189, 194]
@@ -189,7 +199,7 @@ const coinLine20 = coinLine19.map( n => n + width)
 const coinLine21 = coinLine2.map( n => n + width * 19)
 const coinLine22 = coinLine3.map( n => n + width * 19)
 const coinLine23 = coinLine3.map( n => n + width * 20)
-const coinLine24 = [645, 646, 647, 650, 651, 652, 653, 654, 655, 656, 659, 660, 661, 662, 663, 664, 665, 668, 669, 670]
+const coinLine24 = [646, 647, 650, 651, 652, 653, 654, 655, 656, 659, 660, 661, 662, 663, 664, 665, 668, 669]
 const coinLine25 = [675, 678, 681, 690, 693, 696]
 const coinLine26 = coinLine25.map( n => n + width)
 const coinLine27 = coinLine9.map( n => n + width * 18)
@@ -211,6 +221,9 @@ function addCoins() {
     coin.classList.add('coins')
   }
 }
+// * add power-ups to grid
+
+
 // * On map
 // * page load
 // call grid function
@@ -223,7 +236,7 @@ function addCoins() {
 function startGame () {
   if (gameActive === false) {
     clearInterval(gameInterval)
-    gameActive === true
+    gameActive = true
     // countdown to start using setInterval ... 3... 2... 1... Go!
 
     // game active = true
@@ -239,29 +252,38 @@ function startGame () {
     // setInterval for monster movement ever 0.5? seconds
     gameInterval = setInterval(() => {
       if (gamePaused === false) {
-      // moveMonsters
-      moveMonster(beholder)
-      moveMonster(cube)
-      moveMonster(lich)
-      moveMonster(spider)
-    // potential to delay each monster so they leave one after the other
+        // moveMonsters
+        moveMonster(beholder)
+        moveMonster(cube)
+        moveMonster(lich)
+        moveMonster(spider)
+      // potential to delay each monster so they leave one after the other
 
-    // if player lives === 0
-    if (playerHealth === 0) {
-      console.log(`Game over!`)
-      clearInterval(gameInterval)
-    }
-    // gameOver()
-    coinsUntilWin()
-    if (coinsLeft === 0) {
-      console.log(`You win`)
-      clearInterval(gameInterval)
-    }
-    // coinsLeft = grids.filter() => classList.contains('coins'))
-      // if (!coinsLeft || !coinsLeft.length) {youWin()}
-      } else if (gamePaused === true) {
-        return
-      }
+
+        if (playerHealth === 2) {
+          hearts[2].style.display = 'none'
+        } else if (playerHealth === 1) {
+          hearts[1].style.display = 'none'
+        } else if (playerHealth === 0) {
+          hearts[0].classList.add('heart-broken')
+        }
+        // if player lives === 0
+        if (playerHealth === 0) {
+          console.log(`Game over!`)
+          clearInterval(gameInterval)
+          gameActive = false
+        }
+        // gameOver()
+        coinsUntilWin()
+        if (coinsLeft === 0) {
+          console.log(`You win`)
+          clearInterval(gameInterval)
+        }
+        // coinsLeft = grids.filter() => classList.contains('coins'))
+          // if (!coinsLeft || !coinsLeft.length) {youWin()}
+      } //else if (gamePaused === true) {
+       // return
+      //}
     }, monsterSpeed)
   }
 }
@@ -270,6 +292,9 @@ function startGame () {
 
 // add player to start position
 function spawnPlayer(){
+  for (let cell of cells) {
+    cell.classList.remove('hero')
+    }
   const coinflip = Math.floor(Math.random() * 2)
   coinflip ? cells[658].classList.add('hero') : cells[657].classList.add('hero')
   coinflip ? playerPosition = 658 : playerPosition = 657
@@ -282,7 +307,9 @@ function moveHero() {
 
 // function to remove hero icon when moving or dying
 function removeHero() {
-  cells[playerPosition].classList.remove('hero')
+  for (let cell of cells) {
+    cell.classList.remove('hero')
+    }
 }
 
 // ? isWall()
@@ -290,11 +317,12 @@ function removeHero() {
 
 // ? movePlayer()
 function movePlayer(evt) {
+  
   const key = evt.code
   // prevent screen from scrolling when pressing arrow keys
   evt.preventDefault()
   // only when game active = true
-
+  if (gameActive === true) {
   // remove current player position
   removeHero()
   // move the player based on keyboard inputs
@@ -314,30 +342,34 @@ function movePlayer(evt) {
     playerPosition = ((cellCount - width) / 2) - width
   }
   // add new player position
-  moveHero()
-  if (cells[playerPosition].classList.contains('beholder', 'cube', 'lich', 'spider')) {
+  if (cells[playerPosition].classList.contains('beholder') || cells[playerPosition].classList.contains('cube') || cells[playerPosition].classList.contains('lich') || cells[playerPosition].classList.contains('spider')) {
     loseLife()
   }
+  moveHero()
   // loot()
   loot()
-
+  }
 }
 
 // * Monsters
 // spawnMonsters
 function spawnMonster(monster) {
-  cells[monster.startPosition].classList.add(`${monster.name}`)
+  // this performs the function of remove monster
+  cells[monster.currentPosition].classList.remove(`${monster.name}`)
   monster.currentPosition = monster.startPosition
+  cells[monster.startPosition].classList.add(`${monster.name}`)
 }
 
 function removeMonster() {
+  // console.log(typeof cells)
+  // console.log(cells)
+  //cells.forEach(cell => cell.classList.remove('beholder', 'cube', 'lich', 'spider'))
   for (let cell of cells) {
   // console.log(cell.classList)
-  cell.classList.remove('beholder')
-  cell.classList.remove('cube')
-  cell.classList.remove('lich')
-  cell.classList.remove('spider')
+  cell.classList.remove(...enemyClasses)
+  console.log(cell.classList)
   }
+  console.log('remove monster')
 }
 
 // ? moveMonster(monsterNumber)
@@ -421,10 +453,11 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 function loseLife() {
   gamePaused = true
   playerHealth --
-  console.log(playerHealth)
   removeHero()
   removeMonster()
   setTimeout(() => {
+  gamePaused = false
+    // setInterval(gameInterval, monsterSpeed)
     spawnPlayer()
     spawnMonster(beholder)
     spawnMonster(cube)
@@ -461,6 +494,14 @@ function coinsUntilWin() {
 }
 
 // * Game state
+// ? startCoin
+function showCoin() {
+  hoverCoin.style.display = 'block'
+}
+function hideCoin() {
+  hoverCoin.style.display = 'none'
+}
+
 // ? gameOver()
 // clearInterval global monster movement
 // game active = false
@@ -473,7 +514,10 @@ function coinsUntilWin() {
 
 // ! Events
 // * start button
-startButton.addEventListener('click', startGame)
+insertCoins.addEventListener('click', startGame)
+// * start button hover
+insertCoins.addEventListener('mouseover', showCoin)
+insertCoins.addEventListener('mouseleave', hideCoin)
 // * keyboard input
 const keyboardInput = document.addEventListener('keydown', movePlayer)
 
