@@ -194,7 +194,7 @@ const coins = []
 const coinLine2 = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 const coinLine3 = [57, 62, 68, 71, 77, 82]
 const coinLine4 = [90, 96, 99, 105]
-const coinLine5 = coinLine4.map( n => n + width)
+const coinLine5 = [113, 118, 124, 127, 133, 138]
 const coinLine6 = [141, 142, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152, 153, 154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 164, 165, 166]
 const coinLine7 = [169, 174, 177, 186, 189, 194]
 const coinLine8 = coinLine7.map( n => n + width)
@@ -263,14 +263,14 @@ function startGame () {
       playerScore = 0
       scoreText.innerText = `Current Score: ${parseInt(playerScore)}`
       monsterSpeed = 500
+      playerHealth = 3
+      hearts[2].style.display = 'flex'
+      hearts[1].style.display = 'flex'
+      hearts[0].classList.remove('heart-broken')
     } else if (playerContinue === true && monsterSpeed > 100){
       monsterSpeed -= 100
       console.log(monsterSpeed)
     }
-    playerHealth = 3
-    hearts[2].style.display = 'flex'
-    hearts[1].style.display = 'flex'
-    hearts[0].classList.remove('heart-broken')
     // add coins
     addCoins()
     // add power ups
