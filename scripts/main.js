@@ -44,9 +44,10 @@ playerHighScore ? highScoreText.innerText = `High Score: ${parseInt(playerHighSc
 
 // * monsters
 class Monsters {
-  constructor (name, startPosition) {
+  constructor (name, startPosition, delayTimer) {
     this.name = name,
     this.startPosition = startPosition,
+    this.delayTimer = delayTimer,
     this.currentPosition = 0,
     this.currentDirection = 0,
     this.state = 'neutral'
@@ -57,13 +58,13 @@ class Monsters {
 const enemies = []
 
 // monster 1 start/home
-const beholder = new Monsters('beholder', 376)
+const beholder = new Monsters('beholder', 376, 0)
 // monster 2 start/home
-const cube = new Monsters('cube', 379)
+const cube = new Monsters('cube', 379, 2000)
 // monster 3 start/home
-const lich = new Monsters('lich', 432)
+const lich = new Monsters('lich', 432, 4000)
 // monster 4 start/home
-const spider = new Monsters('spider', 435)
+const spider = new Monsters('spider', 435, 6000)
 
 const enemyClasses = ['beholder', 'cube', 'lich', 'spider']
 // monster 1 state (chasing or running away)
@@ -269,7 +270,6 @@ function startGame () {
       hearts[0].classList.remove('heart-broken')
     } else if (playerContinue === true && monsterSpeed > 100){
       monsterSpeed -= 100
-      console.log(monsterSpeed)
     }
     // add coins
     addCoins()
@@ -286,16 +286,32 @@ function startGame () {
     spawnMonster(cube)
     spawnMonster(lich)
     spawnMonster(spider)
+    // delay each monster so they leave one after the other
+    beholder.status = 'active'
+    let cubeTimeout = setTimeout(function() {cube.status = 'active'}, cube.delayTimer)
+    let lichTimeout = setTimeout(function() {lich.status = 'active'}, lich.delayTimer)
+    let spiderTimeout = setTimeout(function() {spider.status = 'active'}, spider.delayTimer)
     // setInterval for monster movement ever 0.5? seconds
     gameInterval = setInterval(() => {
       if (gamePaused === false) {
-        // moveMonsters
-        moveMonster(beholder)
-        moveMonster(cube)
-        moveMonster(lich)
-        moveMonster(spider)
-      // potential to delay each monster so they leave one after the other
-
+        // * moveMonsters
+        // monsters in the active chasing mode
+        if (beholder.status === 'active') {
+          chase(beholder)
+          }
+        if (cube.status === 'active') {
+          moveMonster(cube)
+        }  
+        if (lich.status === 'active') {
+          moveMonster(lich)
+        } 
+        if (spider.status === 'active') {
+          chase(spider)
+        } 
+        if (beholder.status === 'fleeing') {
+          fleeing(beholder)
+        }
+       
 
         if (playerHealth === 2) {
           hearts[2].style.display = 'none'
@@ -469,9 +485,79 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
       }
     }
     cells[monster.currentPosition].classList.add(`${monster.name}`)
-    if (cells[monster.currentPosition].classList.contains('hero')) {
+    if (cells[monster.currentPosition].classList.contains('hero') && monster.status === 'active') {
       loseLife()
     }
+}
+
+// ! dijkstras
+
+function chase(monster){
+  cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  let newPosition = dijkstras(monster.currentPosition, playerPosition)
+  monster.currentPosition = newPosition
+  cells[monster.currentPosition].classList.add(`${monster.name}`)
+  if (cells[monster.currentPosition].classList.contains('hero')) {
+    loseLife()
+  }
+}
+
+// dijkstras(50, 124)
+function dijkstras(start, end) {
+
+  // Initialize the distance from the starting node to all other nodes as infinite
+  let distances = {}
+  for (let i = 0; i < cells.length; i++) distances[i] = Infinity
+  // Distance from start node is 0
+  distances[end] = 0
+  let currentVertex = end // this will be the player
+  // list of visited vertices
+  let visited = []
+  // unvisited (makes a queue of vertices to check)
+  let unVisited = []
+  unVisited.push(currentVertex)
+
+  while (unVisited.length > 0){
+    unVisited.forEach(value => {
+      currentVertex = value
+      // get surrounding cells and remove walls
+      const neighbours = [currentVertex +1, currentVertex -1, currentVertex + width, currentVertex -width].filter(neighbour => !cells[neighbour].classList.contains('wall'))
+      // console.log(neighbours)
+      // console.log(distances)
+      // if current cost + 1 is lower than existing cost update cost
+      neighbours.forEach(neighbour => {
+        // console.log(`distances[neighbour] value of neighbour = ${distances[neighbour]}`)
+        // console.log(distances[currentVertex])
+        // distances neighbour is the existing score
+        // distances current is the new score
+        // we need to check if existing score is greater than new score, if true we update to the existing score to equal the new score
+        if (distances[neighbour] > distances[currentVertex] + 1) {
+          distances[neighbour] = distances[currentVertex] + 1
+          unVisited.push(neighbour)
+        }
+      })
+      // add the currernt vertex to the list of visited vertices
+      visited.push(currentVertex)
+      // remove currentVertex from unVisited
+      const index = unVisited.indexOf(currentVertex)
+      if (index > -1) {
+        unVisited.splice(index, 1)
+      }
+    })
+    // console.log(`visted ${visited}`)
+    // console.log(`unVisted ${unVisited}`)
+    // loop the above process
+  }
+  const cellsSurroundingMonster = [start +1, start -1, start + width, start -width].filter(neighbour => !cells[neighbour].classList.contains('wall'))
+  // console.log(distances)
+  let closestCell
+  for (let i = 0; i < cells.length; i++) {
+//    console.log(distances[i])
+    if (distances[i] === distances[start] - 1 && cellsSurroundingMonster.includes(i)) {
+      closestCell = i
+    }
+  }
+  return closestCell
 }
 
 // monster will move every x seconds
@@ -497,27 +583,29 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 function loseLife() {
   if (powerUpActive === true) {
     if (cells[playerPosition].classList.contains('beholder')){
-      spawnMonster(beholder)
       playerScore += 200
+      beholder.status = 'fleeing'
     } else if (cells[playerPosition].classList.contains('cube')) {
-      spawnMonster(cube)
       playerScore += 200
+      cube.status = 'fleeing'
     } else if (cells[playerPosition].classList.contains('lich')) {
-      spawnMonster(lich)
       playerScore += 200
+      lich.status = 'fleeing'
     } else if (cells[playerPosition].classList.contains('spider')) {
-      spawnMonster(spider)
       playerScore += 200
+      spider.status = 'fleeing'
     }
   } else {
+    // when a monster comes into contact with player player loses life
   gamePaused = true
   playerHealth --
   removeHero()
   removeMonster()
   setTimeout(() => {
   gamePaused = false
-    // setInterval(gameInterval, monsterSpeed)
+    // reset player position
     spawnPlayer()
+    // reset monsters positions
     spawnMonster(beholder)
     spawnMonster(cube)
     spawnMonster(lich)
@@ -527,43 +615,37 @@ function loseLife() {
 }
 
 
-// when a monster comes into contact with player player loses life
-// reset player position
-// reset monsters positions
+function fleeing(monster) {
+  cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  let newPosition = dijkstras(monster.currentPosition, monster.startPosition)
+  monster.currentPosition = newPosition
+  cells[monster.currentPosition].classList.add(`${monster.name}`)
+  console.log(beholder.currentPosition)
+  console.log (beholder.startPosition)
+  if (monster.currentPosition === monster.startPosition) {
+    monster.status = 'active'
+  }
+}
 
 // ? loot()
 function loot(){
   if (cells[playerPosition].classList.contains('coins')) {
+    // if player walks over cell with a coin on it they add to score
     playerScore += 100
     scoreText.innerText = `Current Score: ${parseInt(playerScore)}`
+    // remove 'coin' from the map
     cells[playerPosition].classList.remove('coins')
   } 
 }
-// if player walks over cell with a coin on it they add to score
-// if playerPosition has class of coin add to score
-// remove classList 'coin'
 
 
 // ? powerUp()
 // player either becomes invincible or gains a bonus to their roll
 // this will either be on a timer if invincible or last the game if a bonus
-let flashingEnemies
-
 function powerUp() {
   powerUpTimer = clearTimeout
   powerUpActive = true
   powerUpsText.classList.add('powerUpIcon')
-  // flashingEnemies = setInterval(() => {
-  //   for (let cell of cells) {
-  //     console.log('contains enemies' + cell.classList.contains(...enemies))
-  //     if (cell.classList.contains(...enemies)) {
-        
-  //       cell.classList.add('vulnerable')
-  //     } else {
-  //       cell.classList.remove('vulnerable')
-  //     }
-  //   }
-  // }, 200)
   powerUpTimer = setTimeout(() => {
     powerUpsText.classList.remove('powerUpIcon')
     powerUpActive = false
@@ -627,29 +709,8 @@ gameOverBtn.addEventListener('click', startGame)
 
 // * user input name for high score
 
-// * monster AI movement
- // A*
-  // create two arrays:
-    // open array (cells that can be evaluated)
-    // closed array (cells that have already been evaluated/are walls)
-    // add start cell (cell monster is on) to open
-  // start a loop
-  // current = node in open with lowest f_cost
-  // remove current from open
-  // add current to closed
+// * monster AI movement // ACHIEVED!!
 
-  //if current is the target node (where player is)
-      // execute move in that direction
-  
-  // foreach neighbour of the current node
-    // if neighbour is not traversable or neighbour is in closed array
-      // skip to next neighbour
-    // if neighbour is shorter OR neighbour is not in open
-      // set f_cost of neighbour
-      // set parent of neighbour to current
-      // if neighbour is not in open
-        // add neighbour to open
-
-// * speed up monsters each level advanced
+// * speed up monsters each level advanced // ACHIEVED!!
 
 // * have a dice roll competition when monster and hero collide
