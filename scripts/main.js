@@ -11,10 +11,12 @@ let scoreText = document.querySelector('.current-score')
 let highScoreText = document.querySelector('.high-score')
 // start button
 let startButton = document.querySelector('#start')
-//
+// click to insertcoin/start
 let insertCoins = document.querySelector('.insert-coins')
-//
+// coin animation
 let hoverCoin = document.querySelector('.payment')
+// countdown timer
+let countDownDisplay = document.querySelector('h1')
 // lives
 let hearts = document.getElementsByClassName('life')
 // powerups
@@ -40,6 +42,8 @@ let playerContinue = false
 // high score
 let playerHighScore = localStorage.getItem("high-score")
 playerHighScore ? highScoreText.innerText = `High Score: ${parseInt(playerHighScore)}` : highScoreText.innerText = `High Score: 0`
+// stop player moving before the game fully starts
+let playerLocked = true
 
 
 // * monsters
@@ -50,7 +54,7 @@ class Monsters {
     this.delayTimer = delayTimer,
     this.currentPosition = 0,
     this.currentDirection = 0,
-    this.state = 'neutral'
+    this.state = 'active'
     enemies.push(this)
   }
 }
@@ -67,16 +71,12 @@ const lich = new Monsters('lich', 432, 4000)
 const spider = new Monsters('spider', 435, 6000)
 
 const enemyClasses = ['beholder', 'cube', 'lich', 'spider']
-// monster 1 state (chasing or running away)
-// monster 2 state (chasing or running away)
-// monster 3 state (chasing or running away)
-// monster 4 state (chasing or running away)
-
-
 
 // * environment
 // game active? = false
 let gameActive = false
+// countdown to start game
+let countDown = 3
 // global count for monster movement
 let gameInterval
 // monster speed
@@ -84,6 +84,7 @@ let monsterSpeed = 500
 // powerups
 let powerUpActive = false
 let powerUpTimer
+let powerUpFlashing
 // coinsLeft = [] // cells with coins left array
 let coinsLeft = []
 // game paused while functions execute properly
@@ -256,10 +257,22 @@ function addPowerUps() {
 // ! Main game functions
 // ? startGame()
 function startGame () {
-  gameOverContainer.style.display = 'none'
   hideCoin()
+  playerLocked = true
+  countDownDisplay.style.display = 'block'
   if (gameActive === false) {
+    countDown = 3
+    countDownDisplay.innerText = countDown
+    gameOverContainer.style.display = 'none'
     clearInterval(gameInterval)
+    let countDownTimer = setInterval(function() {
+      countDown--
+      countDownDisplay.innerText = countDown
+      if (countDown <= 0) {
+        clearInterval(countDownTimer)
+        countDownDisplay.innerText = 'GO!'
+      }
+    }, 1000)
     if (playerContinue === false) {
       playerScore = 0
       scoreText.innerText = `Current Score: ${parseInt(playerScore)}`
@@ -275,6 +288,9 @@ function startGame () {
     addCoins()
     // add power ups
     addPowerUps()
+    powerUpTimer = clearTimeout
+    powerUpFlashing = clearInterval
+    powerUpsText.classList.remove('powerUpIcon')
     powerUpActive = false
     gameActive = true
     // countdown to start using setInterval ... 3... 2... 1... Go!
@@ -286,63 +302,78 @@ function startGame () {
     spawnMonster(cube)
     spawnMonster(lich)
     spawnMonster(spider)
-    // delay each monster so they leave one after the other
-    beholder.status = 'active'
-    let cubeTimeout = setTimeout(function() {cube.status = 'active'}, cube.delayTimer)
-    let lichTimeout = setTimeout(function() {lich.status = 'active'}, lich.delayTimer)
-    let spiderTimeout = setTimeout(function() {spider.status = 'active'}, spider.delayTimer)
-    // setInterval for monster movement ever 0.5? seconds
-    gameInterval = setInterval(() => {
-      if (gamePaused === false) {
-        // * moveMonsters
-        // monsters in the active chasing mode
-        if (beholder.status === 'active') {
-          chase(beholder)
+    let gameStart = setTimeout(function() {
+      playerLocked = false
+      countDownDisplay.style.display = 'none'
+      // delay each monster so they leave one after the other
+      beholder.status = 'active'
+      let cubeTimeout = setTimeout(function() {cube.status = 'active'}, cube.delayTimer)
+      let lichTimeout = setTimeout(function() {lich.status = 'active'}, lich.delayTimer)
+      let spiderTimeout = setTimeout(function() {spider.status = 'active'}, spider.delayTimer)
+      // setInterval for monster movement ever 0.5? seconds
+      gameInterval = setInterval(() => {
+        if (gamePaused === false) {
+          // * moveMonsters
+          // monsters in the active chasing mode
+          if (beholder.status === 'active' || beholder.status === 'inDanger') {
+            chase(beholder)
+            }
+          if (cube.status === 'active' || cube.status === 'inDanger') {
+            moveMonster(cube)
+          }  
+          if (lich.status === 'active' || lich.status === 'inDanger') {
+            moveMonster(lich)
+          } 
+          if (spider.status === 'active') {
+            chase(spider)
           }
-        if (cube.status === 'active') {
-          moveMonster(cube)
-        }  
-        if (lich.status === 'active') {
-          moveMonster(lich)
-        } 
-        if (spider.status === 'active') {
-          chase(spider)
-        } 
-        if (beholder.status === 'fleeing') {
-          fleeing(beholder)
+          if (spider.status === 'inDanger') {
+            moveMonster(spider)
+          }
+          if (beholder.status === 'fleeing') {
+            fleeing(beholder)
+          }
+          if (cube.status === 'fleeing') {
+            fleeing(cube)
+          }
+          if (lich.status === 'fleeing') {
+            fleeing(lich)
+          }
+          if (spider.status === 'fleeing') {
+            fleeing(spider)
+          }
+          // change health display as player loses lives
+          if (playerHealth === 2) {
+            hearts[2].style.display = 'none'
+          } else if (playerHealth === 1) {
+            hearts[1].style.display = 'none'
+          } else if (playerHealth === 0) {
+            hearts[0].classList.add('heart-broken')
+          }
+          // if player lives === 0
+          if (playerHealth === 0) {
+            setHighScore()
+            playerContinue = false
+            gameOverText.innerText = `GAME OVER!${'\n'}You were unable to escape the dungeon...${'\n'}Your final score was: ${playerScore}`
+            gameOverBtn.innerText = `Play Again`
+            gameOverContainer.style.display = 'block'
+            clearInterval(gameInterval)
+            gameActive = false
+          }
+          // gameOver()
+          coinsUntilWin()
+          if (coinsLeft === 0) {
+            setHighScore()
+            playerContinue = true
+            gameActive = false
+            gameOverText.innerText = `CONGRATULATIONS!${'\n'}You managed to gather all of the treasure...${'\n'}Your current score is: ${playerScore}${'\n'}Would you like to delve deeper?...`
+            gameOverBtn.innerText = `Continue...`
+            gameOverContainer.style.display = 'block'
+            clearInterval(gameInterval)
+          }
         }
-       
-
-        if (playerHealth === 2) {
-          hearts[2].style.display = 'none'
-        } else if (playerHealth === 1) {
-          hearts[1].style.display = 'none'
-        } else if (playerHealth === 0) {
-          hearts[0].classList.add('heart-broken')
-        }
-        // if player lives === 0
-        if (playerHealth === 0) {
-          setHighScore()
-          playerContinue = false
-          gameOverText.innerText = `GAME OVER!${'\n'}You were unable to escape the dungeon...${'\n'}Your final score was: ${playerScore}`
-          gameOverBtn.innerText = `Play Again`
-          gameOverContainer.style.display = 'block'
-          clearInterval(gameInterval)
-          gameActive = false
-        }
-        // gameOver()
-        coinsUntilWin()
-        if (coinsLeft === 0) {
-          setHighScore()
-          playerContinue = true
-          gameActive = false
-          gameOverText.innerText = `CONGRATULATIONS!${'\n'}You managed to gather all of the treasure...${'\n'}Your current score is: ${playerScore}${'\n'}Would you like to delve deeper?...`
-          gameOverBtn.innerText = `Continue...`
-          gameOverContainer.style.display = 'block'
-          clearInterval(gameInterval)
-        }
-      }
-    }, monsterSpeed)
+      }, monsterSpeed)
+    }, 4000)
   }
 }
 
@@ -380,7 +411,7 @@ function movePlayer(evt) {
   // prevent screen from scrolling when pressing arrow keys
   evt.preventDefault()
   // only when game active = true
-  if (gameActive === true && gamePaused === false) {
+  if (gameActive === true && gamePaused === false && playerLocked === false) {
   // remove current player position
   removeHero()
   // move the player based on keyboard inputs
@@ -493,7 +524,9 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 // ! dijkstras
 
 function chase(monster){
-  cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  if (true) {
+    cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  }
   let newPosition = dijkstras(monster.currentPosition, playerPosition)
   monster.currentPosition = newPosition
   cells[monster.currentPosition].classList.add(`${monster.name}`)
@@ -607,9 +640,13 @@ function loseLife() {
     spawnPlayer()
     // reset monsters positions
     spawnMonster(beholder)
+    beholder.status = 'active'
     spawnMonster(cube)
+    cube.status = 'active'
     spawnMonster(lich)
+    lich.status = 'active'
     spawnMonster(spider)
+    spider.status = 'active'
   }, 1000)
   }
 }
@@ -620,8 +657,6 @@ function fleeing(monster) {
   let newPosition = dijkstras(monster.currentPosition, monster.startPosition)
   monster.currentPosition = newPosition
   cells[monster.currentPosition].classList.add(`${monster.name}`)
-  console.log(beholder.currentPosition)
-  console.log (beholder.startPosition)
   if (monster.currentPosition === monster.startPosition) {
     monster.status = 'active'
   }
@@ -642,12 +677,35 @@ function loot(){
 // ? powerUp()
 // player either becomes invincible or gains a bonus to their roll
 // this will either be on a timer if invincible or last the game if a bonus
+
 function powerUp() {
   powerUpTimer = clearTimeout
+  powerUpFlashing = clearInterval
   powerUpActive = true
   powerUpsText.classList.add('powerUpIcon')
+  beholder.status = 'inDanger'
+  cube.status = 'inDanger'
+  lich.status = 'inDanger'
+  spider.status = 'inDanger'
+  powerUpFlashing = setInterval(() => {
+    if (beholder.status != 'active') {cells[beholder.currentPosition].classList.toggle('beholder')}
+    if (cube.status != 'active') {cells[cube.currentPosition].classList.toggle('cube')}
+    if (lich.status != 'active') {cells[lich.currentPosition].classList.toggle('lich')}
+    if (spider.status != 'active') {cells[spider.currentPosition].classList.toggle('spider')}
+  }, 200)
+
+  // timer to end the powerup
   powerUpTimer = setTimeout(() => {
     powerUpsText.classList.remove('powerUpIcon')
+    cells[beholder.currentPosition].classList.add('beholder')
+    cells[cube.currentPosition].classList.add('cube')
+    cells[lich.currentPosition].classList.add('lich')
+    cells[spider.currentPosition].classList.add('spider')
+    if (beholder.status != 'fleeing') beholder.status = 'active'
+    if (cube.status != 'fleeing') cube.status = 'active'
+    if (lich.status != 'fleeing') lich.status = 'active'
+    if (spider.status != 'fleeing') spider.status = 'active'
+    powerUpFlashing = clearInterval
     powerUpActive = false
   }
   , 5000)

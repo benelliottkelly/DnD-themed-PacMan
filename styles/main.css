@@ -41,11 +41,22 @@ body {
   text-align: center;
   left: 0;
   right: 0;
-  /* color: black; */
   border: 2px solid black;
   box-shadow: 5px 5px 10px 4px lightblue;
-  /* font-family: 'Pixelify Sans', sans-serif; */
-  /* font-size: 1em; */
+}
+
+h1 {
+  display: none;
+  font-family: 'Pixelify Sans', sans-serif;
+  color: rgb(255, 255, 255);
+  font-size: 10em;
+  position: absolute;
+  bottom: 40%;
+  margin: 0 auto;
+  width: 70%;
+  text-align: center;
+  left: 0;
+  right: 0;
 }
 
 h2 {
@@ -209,13 +220,6 @@ button {
   background-size: cover;
 }
 
-.vulnerable {
-  /* animation-duration: 0.5s;
-  animation-name: monsterFlash;
-  animation-iteration-count: infinite; */
-  /* background-image: linear-gradient(rgba(72, 0, 255, 0.333), rgba(72, 0, 255, 0.333)); */
-}
-
 @keyframes coinHover {
   from {
     margin-left: 5px;
@@ -224,12 +228,3 @@ button {
     margin-right: 5px;
   }
 }
-
-/* @keyframes monsterFlash {
-  from {
-    background: linear-gradient(rgba(72, 0, 255, 0.333), rgba(72, 0, 255, 0.333));
-  }
-  to {
-    background: linear-gradient(rgba(255, 255, 255, 0.333), rgba(255, 255, 255, 0.333);
-  }
-} */
