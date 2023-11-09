@@ -11,26 +11,36 @@
   <title>DnD PacMan</title>
 </head>
 <body>
-  <section class="scores-container">
-    <div class="current-score">Current Score: 0</div>
-    <div class="high-score">High Score: 0</div>
-    <div class="insert-coins">Insert a coin to start -> <button id="start">|</button><div class="payment"></div></div>
-  </section>
-  <section class="main floor">
-    <section class="grid"></section>
-    <h1>3</h1>
-    <section class="game-over">
-      <h2></h2>
-      <button class="game-over-button">Play Again</button>
+  <div class="arcade">
+    <section class="screen">
+      <div class="panels" id="left-panel"></div>
+      <section class="container">
+        <section class="scores-container">
+          <div class="current-score">Current Score: 0</div>
+          <div class="high-score">High Score: 0</div>
+        </section>
+        <section class="main floor">
+          <section class="grid"></section>
+          <h1></h1>
+          <section class="game-over">
+            <h2></h2>
+            <button class="game-over-button">Play Again</button>
+          </section>
+        </section>
+        <section class="player-state">
+          <div class="hearts">
+            <div class="life"></div>
+            <div class="life"></div>
+            <div class="life"></div>
+          </div>
+          <div class="powerups"></div>
+        </section>
+      </section>
+      <div class="panels" id="right-panel">
+        <div class="insert-coins">Insert a coin to start -> <button id="start">|</button><div class="payment"></div></div>
+      </div>
     </section>
-  </section>
-  <section class="player-state">
-    <div class="hearts">
-      <div class="life"></div>
-      <div class="life"></div>
-      <div class="life"></div>
-    </div>
-    <div class="powerups"></div>
-  </section>
+  </div>
+  <audio></audio>
 </body>
 </html>

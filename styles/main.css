@@ -1,6 +1,7 @@
 :root {
-  --width: 40vw;
-  --min-width: 600px;
+  --max-width: 600px;
+  --width: 35vw;
+  --min-width: 400px;
 }
 
 * {
@@ -9,25 +10,64 @@
 }
 
 body {
-  background-image: url(../assets/arcade.png);
-  background-position: center 40%;
+  background-image: url(../assets/background.jpg);
+  background-position: center;
   background-repeat: no-repeat;
-  background-size: 275%;
-  margin: 0;
+  background-size: cover;
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
   height: 100vh;
-  min-width: 1300px;
+  margin: 0;
+}
+
+.arcade {
+  background-image: url(../assets/arcade.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: absolute;
+  max-width: calc(var(--max-width) * 3);
+  width: calc(var(--width) * 3);
+  min-width: calc(var(--min-width) * 3);
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  right: 0;
+}
+
+.screen {
+  background-image: linear-gradient(to bottom right, black 0%, #dbdbdb 25%, black 40%);
+  margin: 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  max-width: calc(var(--width) * 2);
+  width: calc(var(--width) * 2);
+  min-width: calc(var(--width) * 2);
+  position: relative;
+  top: 15vh;
+  max-height: calc(var(--max-width) * 1.5);
+  height: calc(var(--width) * 1.5);
+  min-height: calc(var(--min-width) * 1.5);
+}
+
+.container {
+  max-height: calc(var(--max-width) * 1.5);
+  height: calc(var(--width) * 1.5);
+  min-height: calc(var(--min-width) * 1.5);
 }
 
 .main {
-  width: var(--width); /* for use to read numbers */
-  /* width: 60vw; */
-  /* max-width: 750px; */
+  max-width: var(--width);
+  width: var(--width);
   min-width: var(--min-width);
   position: relative;
+}
+
+.panels {
+  max-width: calc(var(--max-width) * 0.5);
+  width: calc(var(--width) * 0.5);
+  min-width: calc(var(--min-width) * 0.5);
 }
 
 .game-over {
@@ -65,27 +105,40 @@ h2 {
   font-size: 2em;
 }
 
+#right-panel {
+  display: flex;
+  justify-content: end;
+}
+
 .scores-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: var(--width); 
+  max-width: var(--width);
+  width: var(--width);
   min-width: var(--min-width);
   font-family: 'Pixelify Sans', sans-serif;
-  padding: 1em;
+  padding: 0.5em;
+  font-size: 1.5em;
 }
 
 .insert-coins {
   display: flex;
   align-items: center;
+  justify-content: end;
   position: relative;
   cursor: pointer;
+  background-image: linear-gradient(to bottom right, #838383 0%, #e9e7e7 25%, #838383 40%);
+  padding: 1em;
+  border: 2px solid darkgrey;
+  max-width: calc(var(--max-width) *0.3);
+  max-height: calc(var(--max-width) *0.15);
 }
 
 .payment {
   display: none;
   position: absolute;
-  right: -15px;
+  right: 0;
   background-image: url(../assets/payment.png);
   background-position: center;
   background-repeat: no-repeat;
@@ -109,7 +162,8 @@ button {
 .player-state {
   display: flex;
   justify-content: space-between;
-  width: var(--width); 
+  max-width: var(--width);
+  width: var(--width);
   min-width: var(--min-width);
   padding: 0.5em;
 }
@@ -125,15 +179,11 @@ button {
   user-select: none;
 }
 
-.div {
-  border: 1px solid gray;
-}
-
 .floor {
   background-image: url('../assets/floor.jpg');
   background-position: center;
   background-repeat: repeat;
-  background-size: 3.5%;
+  background-size: 3.3333333%;
 }
 
 .wall {
@@ -226,5 +276,28 @@ button {
   }
   to {
     margin-right: 5px;
+  }
+}
+
+
+@media screen and (max-width: 1200px) {
+  .arcade {
+    left: 0;
+    position: absolute;
+  }
+
+  .screen {
+    position: absolute;
+    left: 200px;
+  }
+
+  .scores-container {
+    font-size: 1em;
+  }
+}
+
+@media screen and (min-width: 1500px) {
+  .screen {
+    top: 3vh;
   }
 }

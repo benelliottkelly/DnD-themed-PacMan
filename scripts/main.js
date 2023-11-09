@@ -27,6 +27,10 @@ let gameOverContainer = document.querySelector('.game-over')
 let gameOverText = document.querySelector('h2')
 // play again/ continue button
 let gameOverBtn = document.querySelector('.game-over-button')
+// audio
+const audio = document.querySelector('audio')
+
+console.log(audio)
 
 
 // ! Variables
@@ -114,7 +118,6 @@ function createGrid() {
     // set width and height of cells
     cell.style.width = `${100 / width}%`
     cell.style.aspectRatio = `1`
-    cell.style.border = '1px solid rgba(0, 0, 0, 0.5)'
     // append cells array to grid
     grid.append(cell)
   }
