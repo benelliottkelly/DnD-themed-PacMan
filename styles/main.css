@@ -133,6 +133,9 @@ h2 {
   border: 2px solid darkgrey;
   max-width: calc(var(--max-width) *0.3);
   max-height: calc(var(--max-width) *0.15);
+  font-size: 1.1em;
+  color: black;
+  font-weight: bold;
 }
 
 .payment {

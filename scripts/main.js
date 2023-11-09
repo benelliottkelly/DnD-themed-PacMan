@@ -28,10 +28,8 @@ let gameOverText = document.querySelector('h2')
 // play again/ continue button
 let gameOverBtn = document.querySelector('.game-over-button')
 // audio
-const audio = document.querySelector('audio')
-
-console.log(audio)
-
+const music = document.querySelector('.music')
+const audio = document.querySelector('.sound-effect')
 
 // ! Variables
 // * player
@@ -49,7 +47,6 @@ playerHighScore ? highScoreText.innerText = `High Score: ${parseInt(playerHighSc
 // stop player moving before the game fully starts
 let playerLocked = true
 
-
 // * monsters
 class Monsters {
   constructor (name, startPosition, delayTimer) {
@@ -64,14 +61,13 @@ class Monsters {
 }
 
 const enemies = []
-
-// monster 1 start/home
+// monster 1 start/home/time before it starts moving
 const beholder = new Monsters('beholder', 376, 0)
-// monster 2 start/home
+// monster 2 ...
 const cube = new Monsters('cube', 379, 2000)
-// monster 3 start/home
+// monster 3 ...
 const lich = new Monsters('lich', 432, 4000)
-// monster 4 start/home
+// monster 4 ...
 const spider = new Monsters('spider', 435, 6000)
 
 const enemyClasses = ['beholder', 'cube', 'lich', 'spider']
@@ -94,7 +90,6 @@ let coinsLeft = []
 // game paused while functions execute properly
 let gamePaused = false
 
-
 // ! Grid
 // board width
 const width = 28
@@ -102,8 +97,6 @@ const width = 28
 const height = 31
 // cell count = width * height
 const cellCount = width * height
-
-
 
 // function for creating grid
 function createGrid() {
@@ -125,11 +118,8 @@ function createGrid() {
   addWalls()
 }
 
-
 // ! Executions
-
 // ? Walls
-
 // walls = array of unavailable spaces/grids
 // write each wall line by line for easier access later if changes are needed
 const walls = []
@@ -160,9 +150,8 @@ const wallLine26 = wallLine25.map( n => n + width)
 const wallLine27 = wallLine9.map( n => n + width * 18)
 const wallLine28 = [758, 759, 760, 761, 762, 763, 764, 765, 766, 767, 769, 770, 772, 773, 774, 775, 776, 777, 778, 779, 780, 781]
 const wallLine29 = wallLine28.map( n => n + width)
-
+// combine all lines into one array
 const wallMap = wallLine2.concat(wallLine3, wallLine4, wallLine5, wallLine7, wallLine8, wallLine9, wallLine10, wallLine11, wallLine12, wallLine13, wallLine14, wallLine15, wallLine16, wallLine17, wallLine18, wallLine19, wallLine20, wallLine21, wallLine22, wallLine23, wallLine24, wallLine25, wallLine26, wallLine27, wallLine28, wallLine29)
-
 
 function addWalls() {
   for (let cell of cells) {
@@ -187,7 +176,6 @@ function addWalls() {
         walls.push(cell)
       }
     }
-    
   }  
   for (let wall of walls) {
     wall.classList.add('wall')
@@ -240,6 +228,7 @@ function addCoins() {
     coin.classList.add('coins')
   }
 }
+
 // * add power-ups to grid
 let powerUpsGrid = [85, 110, 645, 670]
 function addPowerUps() {
@@ -255,17 +244,17 @@ function addPowerUps() {
 // * On map
 // * page load
 // call grid function
-  createGrid()
+createGrid()
 
 // ! Main game functions
 // ? startGame()
 function startGame () {
   hideCoin()
   playerLocked = true
-  countDownDisplay.style.display = 'block'
   if (gameActive === false) {
     countDown = 3
     countDownDisplay.innerText = countDown
+    countDownDisplay.style.display = 'block'
     gameOverContainer.style.display = 'none'
     clearInterval(gameInterval)
     let countDownTimer = setInterval(function() {
@@ -277,6 +266,7 @@ function startGame () {
       }
     }, 1000)
     if (playerContinue === false) {
+      playSoundEffect('coin')
       playerScore = 0
       scoreText.innerText = `Current Score: ${parseInt(playerScore)}`
       monsterSpeed = 500
@@ -306,6 +296,7 @@ function startGame () {
     spawnMonster(lich)
     spawnMonster(spider)
     let gameStart = setTimeout(function() {
+      playBackgroundMusic()
       playerLocked = false
       countDownDisplay.style.display = 'none'
       // delay each monster so they leave one after the other
@@ -357,6 +348,8 @@ function startGame () {
           if (playerHealth === 0) {
             setHighScore()
             playerContinue = false
+            playSoundEffect('evil-laugh')
+            pauseBackgroundMusic()
             gameOverText.innerText = `GAME OVER!${'\n'}You were unable to escape the dungeon...${'\n'}Your final score was: ${playerScore}`
             gameOverBtn.innerText = `Play Again`
             gameOverContainer.style.display = 'block'
@@ -372,6 +365,8 @@ function startGame () {
             gameOverText.innerText = `CONGRATULATIONS!${'\n'}You managed to gather all of the treasure...${'\n'}Your current score is: ${playerScore}${'\n'}Would you like to delve deeper?...`
             gameOverBtn.innerText = `Continue...`
             gameOverContainer.style.display = 'block'
+            playSoundEffect('skyrim')
+            pauseBackgroundMusic()
             clearInterval(gameInterval)
           }
         }
@@ -381,7 +376,6 @@ function startGame () {
 }
 
 // * Player
-
 // add player to start position
 function spawnPlayer(){
   for (let cell of cells) {
@@ -451,7 +445,9 @@ function movePlayer(evt) {
 // spawnMonsters
 function spawnMonster(monster) {
   // this performs the function of remove monster
-  cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  if (cells[monster.currentPosition].classList.contains(`${monster.name}`)) {
+    cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  }
   monster.currentPosition = monster.startPosition
   cells[monster.startPosition].classList.add(`${monster.name}`)
 }
@@ -483,9 +479,9 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
       monster.currentPosition = monster.currentPosition + direction[randomNumber]
       monster.currentDirection = parseInt(direction[randomNumber])
   }
-  //  console.log(monster.currentPosition)
+  if (cells[monster.currentPosition].classList.contains(`${monster.name}`)) {
     cells[monster.currentPosition].classList.remove(`${monster.name}`)
-    // if monster is in starting cells move out
+  }
     if (monster.currentPosition === 375 || monster.currentPosition === 376 || monster.currentPosition === 403 || monster.currentPosition === 404 || monster.currentPosition === 431 || monster.currentPosition === 432) {
       monster.currentPosition ++
     } else if (monster.currentPosition === 379 || monster.currentPosition === 380 || monster.currentPosition === 407 || monster.currentPosition === 408 || monster.currentPosition === 435 || monster.currentPosition === 436) {
@@ -618,6 +614,7 @@ function dijkstras(start, end) {
 // ? loseLife()
 function loseLife() {
   if (powerUpActive === true) {
+    playSoundEffect('sword')
     if (cells[playerPosition].classList.contains('beholder')){
       playerScore += 200
       beholder.status = 'fleeing'
@@ -634,6 +631,7 @@ function loseLife() {
   } else {
     // when a monster comes into contact with player player loses life
   gamePaused = true
+  playSoundEffect('wilhelm-scream')
   playerHealth --
   removeHero()
   removeMonster()
@@ -684,6 +682,7 @@ function loot(){
 function powerUp() {
   powerUpTimer = clearTimeout
   powerUpFlashing = clearInterval
+  playSoundEffect('mighty-sword')
   powerUpActive = true
   powerUpsText.classList.add('powerUpIcon')
   beholder.status = 'inDanger'
@@ -752,6 +751,22 @@ function setHighScore() {
   }
   playerHighScore = localStorage.getItem("high-score")
   highScoreText.innerText = `High Score: ${parseInt(playerHighScore)}`
+}
+
+function playBackgroundMusic() {
+  music.volume = 0.2
+  music.currentTime = 0
+  music.play()
+}
+
+function pauseBackgroundMusic() {
+  music.pause()
+}
+
+function playSoundEffect(source) {
+  audio.volume = 0.2
+  audio.src = `audio/${source}.mp3`
+  audio.play()
 }
 
 // ! Events
