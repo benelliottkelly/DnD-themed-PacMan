@@ -103,9 +103,8 @@ function createGrid() {
   // count number of cells(divs)
   for (let i = 0; i < cellCount; i++) {
     const cell = document.createElement('div')
-    //* give each div a visable number and matching ID
+    // give each div a visable number and matching ID
     cell.innerText = `${i}`
-    //* console.log(cell.innerText)
     cell.id = `${i}`
     cell.classList.add('cell')
     // set width and height of cells
@@ -182,7 +181,7 @@ function addWalls() {
   }
 }
 
-// * add coins to grid
+// * add coins to grid using same process as walls
 const coins = []
 const coinLine2 = [29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 const coinLine3 = [57, 62, 68, 71, 77, 82]
@@ -248,15 +247,20 @@ createGrid()
 
 // ! Main game functions
 // ? startGame()
+// * on clicking the start button/inserting coins
 function startGame () {
   hideCoin()
+  // stop player moving until countdown has finished
   playerLocked = true
+  // stop player clicking start game again if game is currently in progress
   if (gameActive === false) {
+    // reset/set game state
     countDown = 3
     countDownDisplay.innerText = countDown
     countDownDisplay.style.display = 'block'
     gameOverContainer.style.display = 'none'
     clearInterval(gameInterval)
+    // countdown to start using setInterval ... 3... 2... 1... Go!
     let countDownTimer = setInterval(function() {
       countDown--
       countDownDisplay.innerText = countDown
@@ -265,6 +269,7 @@ function startGame () {
         countDownDisplay.innerText = 'GO!'
       }
     }, 1000)
+    // if player died last time reset their health, score and monster speed
     if (playerContinue === false) {
       playSoundEffect('coin')
       playerScore = 0
@@ -274,6 +279,7 @@ function startGame () {
       hearts[2].style.display = 'flex'
       hearts[1].style.display = 'flex'
       hearts[0].classList.remove('heart-broken')
+    // if player won the last game, continue with current life and increase monster speed
     } else if (playerContinue === true && monsterSpeed > 100){
       monsterSpeed -= 100
     }
@@ -286,7 +292,6 @@ function startGame () {
     powerUpsText.classList.remove('powerUpIcon')
     powerUpActive = false
     gameActive = true
-    // countdown to start using setInterval ... 3... 2... 1... Go!
 
     // addPlayer
     spawnPlayer()
@@ -304,7 +309,7 @@ function startGame () {
       let cubeTimeout = setTimeout(function() {cube.status = 'active'}, cube.delayTimer)
       let lichTimeout = setTimeout(function() {lich.status = 'active'}, lich.delayTimer)
       let spiderTimeout = setTimeout(function() {spider.status = 'active'}, spider.delayTimer)
-      // setInterval for monster movement ever 0.5? seconds
+      // setInterval for monster movement ever 0.5 seconds
       gameInterval = setInterval(() => {
         if (gamePaused === false) {
           // * moveMonsters
@@ -345,28 +350,36 @@ function startGame () {
             hearts[0].classList.add('heart-broken')
           }
           // if player lives === 0
+          // ? gameOver()
           if (playerHealth === 0) {
             setHighScore()
             playerContinue = false
             playSoundEffect('evil-laugh')
             pauseBackgroundMusic()
+            // display score nicely on screen
             gameOverText.innerText = `GAME OVER!${'\n'}You were unable to escape the dungeon...${'\n'}Your final score was: ${playerScore}`
             gameOverBtn.innerText = `Play Again`
             gameOverContainer.style.display = 'block'
+            // clearInterval global monster movement
             clearInterval(gameInterval)
+            // game active = false which allows game to start again
             gameActive = false
           }
-          // gameOver()
+          
+          // ? youWin()
           coinsUntilWin()
           if (coinsLeft === 0) {
             setHighScore()
             playerContinue = true
             gameActive = false
+            // congratulations message
             gameOverText.innerText = `CONGRATULATIONS!${'\n'}You managed to gather all of the treasure...${'\n'}Your current score is: ${playerScore}${'\n'}Would you like to delve deeper?...`
+            // play again/next level
             gameOverBtn.innerText = `Continue...`
             gameOverContainer.style.display = 'block'
             playSoundEffect('skyrim')
             pauseBackgroundMusic()
+            // clearInterval
             clearInterval(gameInterval)
           }
         }
@@ -380,7 +393,7 @@ function startGame () {
 function spawnPlayer(){
   for (let cell of cells) {
     cell.classList.remove('hero')
-    }
+  }
   const coinflip = Math.floor(Math.random() * 2)
   coinflip ? cells[658].classList.add('hero') : cells[657].classList.add('hero')
   coinflip ? playerPosition = 658 : playerPosition = 657
@@ -453,11 +466,7 @@ function spawnMonster(monster) {
 }
 
 function removeMonster() {
-  // console.log(typeof cells)
-  // console.log(cells)
-  //cells.forEach(cell => cell.classList.remove('beholder', 'cube', 'lich', 'spider'))
   for (let cell of cells) {
-  // console.log(cell.classList)
     cell.classList.remove(...enemyClasses)
   }
 }
@@ -489,7 +498,7 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
     } else if (monster.currentPosition === 349 || monster.currentPosition === 350 || monster.currentPosition === 377 || monster.currentPosition === 378 || monster.currentPosition === 405 || monster.currentPosition === 406 || monster.currentPosition === 433 || monster.currentPosition === 434){
       monster.currentPosition -= width
       monster.currentDirection = 0 - width
-      // if monster reaches a junction chose random direction
+      // if monster reaches a junction choose random direction
     } else if ((wallNorth === false && wallEast === false) || (wallNorth === false && wallWest === false) || (wallSouth === false && wallEast === false) || (wallSouth === false && wallWest === false)) {
         changeDirection()
         // if monster is moving in a direction and can continue in that direction, keep going until it hits a wall
@@ -520,8 +529,7 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
     }
 }
 
-// ! dijkstras
-
+// ! dijkstras algorithim
 function chase(monster){
   if (true) {
     cells[monster.currentPosition].classList.remove(`${monster.name}`)
@@ -534,15 +542,14 @@ function chase(monster){
   }
 }
 
-// dijkstras(50, 124)
-function dijkstras(start, end) {
 
+function dijkstras(start, end) {
   // Initialize the distance from the starting node to all other nodes as infinite
   let distances = {}
   for (let i = 0; i < cells.length; i++) distances[i] = Infinity
   // Distance from start node is 0
   distances[end] = 0
-  let currentVertex = end // this will be the player
+  let currentVertex = end // this will be the player or monster start position
   // list of visited vertices
   let visited = []
   // unvisited (makes a queue of vertices to check)
@@ -554,12 +561,8 @@ function dijkstras(start, end) {
       currentVertex = value
       // get surrounding cells and remove walls
       const neighbours = [currentVertex +1, currentVertex -1, currentVertex + width, currentVertex -width].filter(neighbour => !cells[neighbour].classList.contains('wall'))
-      // console.log(neighbours)
-      // console.log(distances)
       // if current cost + 1 is lower than existing cost update cost
       neighbours.forEach(neighbour => {
-        // console.log(`distances[neighbour] value of neighbour = ${distances[neighbour]}`)
-        // console.log(distances[currentVertex])
         // distances neighbour is the existing score
         // distances current is the new score
         // we need to check if existing score is greater than new score, if true we update to the existing score to equal the new score
@@ -576,15 +579,10 @@ function dijkstras(start, end) {
         unVisited.splice(index, 1)
       }
     })
-    // console.log(`visted ${visited}`)
-    // console.log(`unVisted ${unVisited}`)
-    // loop the above process
   }
   const cellsSurroundingMonster = [start +1, start -1, start + width, start -width].filter(neighbour => !cells[neighbour].classList.contains('wall'))
-  // console.log(distances)
   let closestCell
   for (let i = 0; i < cells.length; i++) {
-//    console.log(distances[i])
     if (distances[i] === distances[start] - 1 && cellsSurroundingMonster.includes(i)) {
       closestCell = i
     }
@@ -592,27 +590,9 @@ function dijkstras(start, end) {
   return closestCell
 }
 
-// monster will move every x seconds
-// movement will be randomised first then potentially updated to be based on the shortest route to the player (Dijkstra’s algorithm or A*)
-// monster must first leave homespaces
-
-// randomMovement
-// instead of random every turn, move until they collide and then chose a random direction
-// Array with [1, -1, width, 0-width]
-// i = Math.floor(Math.random() * 4)
-// monster position remove classlist
-// use same logic as movePlayer() to check monster is not moving out of map or into a wall
-// monster position += array[i]
-// monster position add classlist
-
-// if monster position has classlist 'hero'
-// if powerup active
-// monster goes inactive and moves home || position is reset to home
-// else
-// loseLife
-
 // ? loseLife()
 function loseLife() {
+  // when a monster or player contact each other while player is powered up, player defeats monster causing it to run home
   if (powerUpActive === true) {
     playSoundEffect('sword')
     if (cells[playerPosition].classList.contains('beholder')){
@@ -630,29 +610,29 @@ function loseLife() {
     }
   } else {
     // when a monster comes into contact with player player loses life
-  gamePaused = true
-  playSoundEffect('wilhelm-scream')
-  playerHealth --
-  removeHero()
-  removeMonster()
-  setTimeout(() => {
-  gamePaused = false
-    // reset player position
-    spawnPlayer()
-    // reset monsters positions
-    spawnMonster(beholder)
-    beholder.status = 'active'
-    spawnMonster(cube)
-    cube.status = 'active'
-    spawnMonster(lich)
-    lich.status = 'active'
-    spawnMonster(spider)
-    spider.status = 'active'
-  }, 1000)
+    gamePaused = true
+    playSoundEffect('wilhelm-scream')
+    playerHealth --
+    removeHero()
+    removeMonster()
+    setTimeout(() => {
+      gamePaused = false
+      // reset player position
+      spawnPlayer()
+      // reset monsters positions
+      spawnMonster(beholder)
+      beholder.status = 'active'
+      spawnMonster(cube)
+      cube.status = 'active'
+      spawnMonster(lich)
+      lich.status = 'active'
+      spawnMonster(spider)
+      spider.status = 'active'
+    }, 1000)
   }
 }
 
-
+// when monster has been killed by player it will run back to its starting position before turning active again
 function fleeing(monster) {
   cells[monster.currentPosition].classList.remove(`${monster.name}`)
   let newPosition = dijkstras(monster.currentPosition, monster.startPosition)
@@ -676,9 +656,7 @@ function loot(){
 
 
 // ? powerUp()
-// player either becomes invincible or gains a bonus to their roll
-// this will either be on a timer if invincible or last the game if a bonus
-
+// player becomes invincible for a period of time and kills any monster they come in contact with 
 function powerUp() {
   powerUpTimer = clearTimeout
   powerUpFlashing = clearInterval
@@ -690,10 +668,10 @@ function powerUp() {
   lich.status = 'inDanger'
   spider.status = 'inDanger'
   powerUpFlashing = setInterval(() => {
-    if (beholder.status != 'active') {cells[beholder.currentPosition].classList.toggle('beholder')}
-    if (cube.status != 'active') {cells[cube.currentPosition].classList.toggle('cube')}
-    if (lich.status != 'active') {cells[lich.currentPosition].classList.toggle('lich')}
-    if (spider.status != 'active') {cells[spider.currentPosition].classList.toggle('spider')}
+      if (beholder.status != 'active') {cells[beholder.currentPosition].classList.toggle('beholder')}
+      if (cube.status != 'active') {cells[cube.currentPosition].classList.toggle('cube')}
+      if (lich.status != 'active') {cells[lich.currentPosition].classList.toggle('lich')}
+      if (spider.status != 'active') {cells[spider.currentPosition].classList.toggle('spider')}
   }, 200)
 
   // timer to end the powerup
@@ -713,7 +691,6 @@ function powerUp() {
   , 5000)
 }
 
-
 // creates an arrya with of all the tiles with coins left, until there are none left and a win condition can be triggered
 function coinsUntilWin() {
   coinsLeft = document.getElementsByClassName('coins').length
@@ -721,48 +698,45 @@ function coinsUntilWin() {
 
 // * Game state
 // ? startCoin
+// shows the payment coin when player hovers mouse over start button
 function showCoin() {
   if (gameActive === false) {
     hoverCoin.style.display = 'block'
   }
 }
+
+// hides coin when game starts or player moves mouse away
 function hideCoin() {
   hoverCoin.style.display = 'none'
 }
 
-// ? gameOver()
-// clearInterval global monster movement
-// game active = false
-// display score nicely on screen
-
-// ? youWin()
-// clearInterval
-// congratulations message
-// play again/next level
-
 // ? high score()
+// sets a locally stored high score
 function setHighScore() {
   if(playerHighScore !== null){
     if (playerScore > parseInt(playerHighScore)) {
         localStorage.setItem("high-score", playerScore)    
-      }
-    } else {
+    }
+  } else {
       localStorage.setItem("high-score", playerScore)
   }
   playerHighScore = localStorage.getItem("high-score")
   highScoreText.innerText = `High Score: ${parseInt(playerHighScore)}`
 }
 
+// plays background music after game start and countdown
 function playBackgroundMusic() {
   music.volume = 0.2
   music.currentTime = 0
   music.play()
 }
 
+// pauses background music upon end game
 function pauseBackgroundMusic() {
   music.pause()
 }
 
+// play various sound effects depending on the trigger
 function playSoundEffect(source) {
   audio.volume = 0.2
   audio.src = `audio/${source}.mp3`
@@ -783,10 +757,10 @@ gameOverBtn.addEventListener('click', startGame)
 
 // ! stretch goals
 
-// * user input name for high score
+// * user input name for high score // still to come
 
 // * monster AI movement // ACHIEVED!!
 
 // * speed up monsters each level advanced // ACHIEVED!!
 
-// * have a dice roll competition when monster and hero collide
+// * have a dice roll competition when monster and hero collide // still to come
