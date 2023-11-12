@@ -467,7 +467,9 @@ function spawnMonster(monster) {
 
 function removeMonster() {
   for (let cell of cells) {
+    if (cell.classList.contains(...enemyClasses)) {
     cell.classList.remove(...enemyClasses)
+    }
   }
 }
 
@@ -531,7 +533,7 @@ let wallWest = cells[monster.currentPosition -1].classList.contains('wall')
 
 // ! dijkstras algorithim
 function chase(monster){
-  if (true) {
+  if (cells[monster.currentPosition].classList.contains(`${monster.name}`)) {
     cells[monster.currentPosition].classList.remove(`${monster.name}`)
   }
   let newPosition = dijkstras(monster.currentPosition, playerPosition)
@@ -634,7 +636,9 @@ function loseLife() {
 
 // when monster has been killed by player it will run back to its starting position before turning active again
 function fleeing(monster) {
-  cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  if (cells[monster.currentPosition].classList.contains(`${monster.name}`)) {
+    cells[monster.currentPosition].classList.remove(`${monster.name}`)
+  }
   let newPosition = dijkstras(monster.currentPosition, monster.startPosition)
   monster.currentPosition = newPosition
   cells[monster.currentPosition].classList.add(`${monster.name}`)
@@ -764,3 +768,10 @@ gameOverBtn.addEventListener('click', startGame)
 // * speed up monsters each level advanced // ACHIEVED!!
 
 // * have a dice roll competition when monster and hero collide // still to come
+
+// ! Bugs and potential fixes
+
+// bug where when using powerup, error for trying to remove class which isn't there causes crash
+// ? potential fix to change flashing monsters to display none rather than remove class?
+
+// bug where monsters all leave base at same time after respawn
